@@ -84,7 +84,7 @@ export const campaignService = {
       }),
     ]);
 
-    const formatted = campaigns.map((c) => ({
+    const formatted = campaigns.map((c: any) => ({
       id: c.id,
       name: c.name,
       description: c.description,

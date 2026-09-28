@@ -11,7 +11,7 @@ export function validateBody(schema: ZodSchema) {
         res.status(400).json({
           success: false,
           error: 'Validation failed',
-          details: err.errors.map((e) => ({
+          details: err.errors.map((e: any) => ({
             field: e.path.join('.'),
             message: e.message,
           })),
@@ -33,7 +33,7 @@ export function validateQuery(schema: ZodSchema) {
         res.status(400).json({
           success: false,
           error: 'Query parameter validation failed',
-          details: err.errors.map((e) => ({
+          details: err.errors.map((e: any) => ({
             field: e.path.join('.'),
             message: e.message,
           })),

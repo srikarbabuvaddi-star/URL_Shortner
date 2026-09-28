@@ -201,7 +201,7 @@ export const linkService = {
     ]);
 
     // Format links and calculate live lifecycle status
-    const formattedLinks = links.map((link) => {
+    const formattedLinks = links.map((link: any) => {
       return this.formatLinkResponse(link);
     });
 

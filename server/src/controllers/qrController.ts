@@ -144,7 +144,7 @@ export const qrController = {
       });
 
       const formatted = await Promise.all(
-        qrs.map(async (qr) => ({
+        qrs.map(async (qr: any) => ({
           id: qr.id,
           linkId: qr.link.id,
           shortCode: qr.link.shortCode,

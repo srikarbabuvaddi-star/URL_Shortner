@@ -221,7 +221,7 @@ export const adminService = {
       page,
       limit,
       totalPages: Math.ceil(total / limit),
-      links: links.map((l) => ({
+      links: links.map((l: any) => ({
         ...l,
         totalClicks: l._count.events,
       })),

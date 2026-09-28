@@ -143,7 +143,7 @@ export const analyticsService = {
       timelineMap[dateKey].uniqueVisitors.add(ev.visitorId);
     }
 
-    const timeline = Object.values(timelineMap).map((item) => ({
+    const timeline = Object.values(timelineMap).map((item: any) => ({
       date: item.date,
       clicks: item.clicks,
       uniqueVisitors: item.uniqueVisitors.size,
@@ -180,7 +180,7 @@ export const analyticsService = {
         countries: this.toSortedArray(countryCounts),
         referrers: this.toSortedArray(referrerCounts),
       },
-      recentEvents: events.slice(-20).reverse().map((ev) => ({
+      recentEvents: events.slice(-20).reverse().map((ev: any) => ({
         id: ev.id,
         timestamp: ev.timestamp,
         country: ev.country || 'Unknown',
@@ -221,7 +221,7 @@ export const analyticsService = {
     }
 
     const { from, to } = this.resolveDateRange(filter);
-    const linkIds = campaign.links.map((l) => l.id);
+    const linkIds = campaign.links.map((l: any) => l.id);
 
     const events = await prisma.analyticsEvent.findMany({
       where: {
@@ -273,7 +273,7 @@ export const analyticsService = {
       timelineMap[dateKey].uniqueVisitors.add(ev.visitorId);
     }
 
-    const channels = Object.values(channelAttribution).map((item) => ({
+    const channels = Object.values(channelAttribution).map((item: any) => ({
       channel: item.channel,
       shortCode: item.shortCode,
       clicks: item.clicks,
@@ -295,7 +295,7 @@ export const analyticsService = {
         qrAttributedVisits: totalQrAttributedVisits,
       },
       channels,
-      timeline: Object.values(timelineMap).map((t) => ({
+      timeline: Object.values(timelineMap).map((t: any) => ({
         date: t.date,
         clicks: t.clicks,
         uniqueVisitors: t.uniqueVisitors.size,
@@ -313,7 +313,7 @@ export const analyticsService = {
       select: { id: true, shortCode: true, title: true, status: true, lastClickedAt: true, expiresAt: true },
     });
 
-    const linkIds = userLinks.map((l) => l.id);
+    const linkIds = userLinks.map((l: any) => l.id);
 
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -332,7 +332,7 @@ export const analyticsService = {
       prisma.qrCode.count({ where: { link: { userId } } }),
     ]);
 
-    const uniqueVisitors = new Set(events30Days.map((e) => e.visitorId)).size;
+    const uniqueVisitors = new Set(events30Days.map((e: any) => e.visitorId)).size;
 
     // Timeline for last 14 days
     const dailyMap: Record<string, number> = {};
@@ -393,7 +393,7 @@ export const analyticsService = {
 
     // Generate CSV
     const headers = ['Timestamp', 'Country', 'Device', 'Browser', 'OS', 'Referrer', 'IsBot'];
-    const rows = report.recentEvents.map((e) => [
+    const rows = report.recentEvents.map((e: any) => [
       e.timestamp.toISOString(),
       `"${e.country}"`,
       `"${e.deviceType}"`,
@@ -403,7 +403,7 @@ export const analyticsService = {
       e.isBot ? 'YES' : 'NO',
     ]);
 
-    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const csvContent = [headers.join(','), ...rows.map((r: any) => r.join(','))].join('\n');
 
     return {
       contentType: 'text/csv',

@@ -65,7 +65,7 @@ class QueueService {
     try {
       // 1. Bulk insert analytics events
       await prisma.analyticsEvent.createMany({
-        data: batch.map((item) => ({
+        data: batch.map((item: any) => ({
           linkId: item.linkId,
           campaignId: item.campaignId || null,
           timestamp: item.timestamp || new Date(),
@@ -87,7 +87,7 @@ class QueueService {
       });
 
       // 2. Update lastClickedAt on affected links
-      const uniqueLinkIds = Array.from(new Set(batch.map((b) => b.linkId)));
+      const uniqueLinkIds = Array.from(new Set(batch.map((b: any) => b.linkId)));
       const now = new Date();
       await prisma.link.updateMany({
         where: {
