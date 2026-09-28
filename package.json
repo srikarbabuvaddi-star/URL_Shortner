@@ -14,9 +14,9 @@
     "start": "npm --prefix server start",
     "preview": "vite preview",
     "test": "vitest run",
-    "prisma:generate": "npm --prefix server run prisma:generate",
-    "prisma:push": "npm --prefix server run prisma:push",
-    "prisma:seed": "npm --prefix server run prisma:seed"
+    "prisma:generate": "prisma generate --schema=prisma/schema.prisma",
+    "prisma:push": "prisma db push --schema=prisma/schema.prisma",
+    "prisma:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
