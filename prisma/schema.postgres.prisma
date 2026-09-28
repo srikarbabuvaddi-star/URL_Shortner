@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  passwordHash String        @map("password_hash")
+  role         String        @default("USER") // USER, ADMIN
+  status       String        @default("ACTIVE") // ACTIVE, SUSPENDED
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  links        Link[]
+  campaigns    Campaign[]
+  sessions     Session[]
+  auditLogs    AuditLog[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Link {
+  id            String           @id @default(uuid())
+  userId        String           @map("user_id")
+  campaignId    String?          @map("campaign_id")
+  shortCode     String           @unique @map("short_code")
+  originalUrl   String           @map("original_url")
+  customAlias   String?          @unique @map("custom_alias")
+  title         String?
+  status        String           @default("ACTIVE") // ACTIVE, DISABLED, EXPIRED, BLOCKED
+  expiresAt     DateTime?        @map("expires_at")
+  lastClickedAt DateTime?        @map("last_clicked_at")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaign      Campaign?        @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  campaignLinks CampaignLink[]
+  qrCodes       QrCode[]
+  events        AnalyticsEvent[]
+
+  @@index([userId])
+  @@index([shortCode])
+  @@index([status])
+  @@index([campaignId])
+  @@map("links")
+}
+
+model Campaign {
+  id          String           @id @default(uuid())
+  userId      String           @map("user_id")
+  name        String
+  description String?
+  status      String           @default("ACTIVE") // ACTIVE, ARCHIVED
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links       Link[]
+  campaignLinks CampaignLink[]
+  events      AnalyticsEvent[]
+
+  @@index([userId])
+  @@map("campaigns")
+}
+
+model CampaignLink {
+  id         String   @id @default(uuid())
+  campaignId String   @map("campaign_id")
+  linkId     String   @map("link_id")
+  channel    String
+  source     String
+  medium     String
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  link       Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, linkId])
+  @@index([campaignId])
+  @@index([linkId])
+  @@map("campaign_links")
+}
+
+model QrCode {
+  id            String   @id @default(uuid())
+  linkId        String   @map("link_id")
+  format        String   @default("PNG")
+  downloadCount Int      @default(0) @map("download_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  link          Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@index([linkId])
+  @@map("qr_codes")
+}
+
+model AnalyticsEvent {
+  id             String    @id @default(uuid())
+  linkId         String    @map("link_id")
+  campaignId     String?   @map("campaign_id")
+  timestamp      DateTime  @default(now())
+  visitorId      String    @map("visitor_id")
+  ipHash         String    @map("ip_hash")
+  country        String?
+  region         String?
+  city           String?
+  deviceType     String?   @map("device_type")
+  browser        String?
+  browserVersion String?   @map("browser_version")
+  os             String?
+  osVersion      String?   @map("os_version")
+  referrer       String?
+  userAgent      String?   @map("user_agent")
+  isBot          Boolean   @default(false) @map("is_bot")
+  statusCode     Int       @default(302) @map("status_code")
+
+  link           Link      @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  campaign       Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@index([linkId])
+  @@index([campaignId])
+  @@index([timestamp])
+  @@index([visitorId])
+  @@map("analytics_events")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  adminUserId String   @map("admin_user_id")
+  action      String
+  targetType  String   @map("target_type")
+  targetId    String   @map("target_id")
+  metadata    String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  adminUser   User     @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId])
+  @@index([targetType])
+  @@map("audit_logs")
+}
+
+model BlockedDomain {
+  id        String   @id @default(uuid())
+  domain    String   @unique
+  reason    String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([domain])
+  @@map("blocked_domains")
+}
