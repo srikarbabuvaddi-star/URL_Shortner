@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Link2, Lock, Mail, ArrowRight, ShieldCheck, UserCheck } from 'lucide-react';
+import { Link2, ArrowRight, ShieldCheck, Zap, BarChart3, Check } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 
@@ -24,10 +24,10 @@ export const LoginPage: React.FC = () => {
 
     try {
       await login(email, password);
-      toast.success('Welcome back to LinkPulse!');
+      toast.success('Welcome back to urlly!');
       navigate(redirectUrl);
     } catch (err: any) {
-      setErrorMsg(err.message || 'Invalid credentials');
+      setErrorMsg(err.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }
@@ -48,84 +48,133 @@ export const LoginPage: React.FC = () => {
   return (
     <div
       style={{
-        minHeight: 'calc(100vh - 160px)',
+        minHeight: 'calc(100vh - 120px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '3rem 1rem',
+        padding: '3rem 1.5rem',
       }}
     >
-      <div style={{ width: '100%', maxWidth: '440px' }}>
-        {/* Brand Header */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div
-            style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '12px',
-              background: 'var(--accent-gradient)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(99, 102, 241, 0.4)',
-              marginBottom: '1rem',
-            }}
-          >
-            <Link2 size={24} color="#ffffff" />
-          </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Welcome back</h1>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-            Sign in to manage your short URLs, QR codes, and analytics
-          </p>
-        </div>
-
-        {/* Demo Fast-Fill Bar */}
+      <div
+        className="card"
+        style={{
+          width: '100%',
+          maxWidth: '960px',
+          padding: 0,
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          overflow: 'hidden',
+          boxShadow: 'var(--shadow-lg)',
+        }}
+      >
+        {/* Left Column: Brand & Product Message */}
         <div
           style={{
-            background: 'rgba(99, 102, 241, 0.08)',
-            border: '1px solid rgba(99, 102, 241, 0.2)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '1rem',
-            marginBottom: '1.5rem',
-            textAlign: 'center',
+            background: '#FAFBFC',
+            borderRight: '1px solid var(--border-color)',
+            padding: '3rem 2.5rem',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
           }}
         >
-          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-secondary)', textTransform: 'uppercase', marginBottom: '0.6rem' }}>
-            ⚡ One-Click Demo Credentials
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
+              <div
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '6px',
+                  background: 'var(--primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Link2 size={16} color="#FFFFFF" strokeWidth={2.5} />
+              </div>
+              <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                urlly
+              </span>
+            </div>
+
+            <h2 style={{ fontSize: '24px', fontWeight: 700, lineHeight: 1.25, color: 'var(--text-primary)', marginBottom: '0.85rem' }}>
+              Intelligent short links & campaign attribution.
+            </h2>
+            <p className="text-secondary" style={{ fontSize: '13.5px', lineHeight: 1.6, marginBottom: '2rem' }}>
+              Join thousands of marketers and engineering teams shortening millions of links with sub-5ms latency and deep privacy-first visitor analytics.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                <Check size={16} color="var(--success)" />
+                <span>Sub-5ms Redis-backed redirects</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                <Check size={16} color="var(--success)" />
+                <span>Evergreen dynamic vector QR codes</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                <Check size={16} color="var(--success)" />
+                <span>HMAC-SHA256 privacy visitor tracking</span>
+              </div>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center' }}>
-            <button
-              type="button"
-              onClick={fillUserDemo}
-              className="btn btn-secondary btn-sm"
-              style={{ fontSize: '0.8rem', flex: 1 }}
-            >
-              <UserCheck size={14} color="#10b981" />
-              <span>User Demo</span>
-            </button>
-            <button
-              type="button"
-              onClick={fillAdminDemo}
-              className="btn btn-secondary btn-sm"
-              style={{ fontSize: '0.8rem', flex: 1 }}
-            >
-              <ShieldCheck size={14} color="#f43f5e" />
-              <span>Admin Demo</span>
-            </button>
+
+          {/* Quick Demo Fill Buttons */}
+          <div
+            style={{
+              marginTop: '2rem',
+              padding: '0.85rem',
+              background: '#FFFFFF',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-sm)',
+            }}
+          >
+            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '0.45rem' }}>
+              Quick Demo Fill
+            </span>
+            <div style={{ display: 'flex', gap: '0.45rem' }}>
+              <button
+                type="button"
+                onClick={fillUserDemo}
+                className="btn btn-secondary btn-sm"
+                style={{ flex: 1 }}
+              >
+                Standard User
+              </button>
+              <button
+                type="button"
+                onClick={fillAdminDemo}
+                className="btn btn-secondary btn-sm"
+                style={{ flex: 1 }}
+              >
+                Admin User
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Card Form */}
-        <div className="card" style={{ padding: '2rem' }}>
+        {/* Right Column: Login Form */}
+        <div style={{ padding: '3rem 2.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ marginBottom: '1.75rem' }}>
+            <h1 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
+              Log in to your account
+            </h1>
+            <p className="text-secondary" style={{ fontSize: '13px' }}>
+              Don't have an account? <Link to="/register" style={{ fontWeight: 600 }}>Create account</Link>
+            </p>
+          </div>
+
           {errorMsg && (
             <div
               style={{
-                background: 'rgba(244, 63, 94, 0.1)',
-                border: '1px solid rgba(244, 63, 94, 0.3)',
-                color: '#f43f5e',
-                padding: '0.75rem 1rem',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '0.85rem',
+                padding: '0.65rem 0.85rem',
+                borderRadius: 'var(--radius-sm)',
+                background: 'var(--danger-subtle)',
+                color: 'var(--danger)',
+                fontSize: '12.5px',
+                border: '1px solid rgba(200, 51, 56, 0.2)',
                 marginBottom: '1.25rem',
               }}
             >
@@ -135,62 +184,43 @@ export const LoginPage: React.FC = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label className="form-label">Email Address</label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="email"
-                  className="form-input"
-                  placeholder="name@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  style={{ paddingLeft: '2.5rem' }}
-                />
-                <Mail
-                  size={16}
-                  style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
-                />
-              </div>
+              <label className="form-label">Email</label>
+              <input
+                type="email"
+                required
+                className="form-input"
+                placeholder="name@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
 
             <div className="form-group">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <label className="form-label">Password</label>
+                <span style={{ fontSize: '12px', color: 'var(--primary)', cursor: 'pointer' }} onClick={() => toast.info('Default demo password is: Password123!')}>
+                  Forgot password?
+                </span>
               </div>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="password"
-                  className="form-input"
-                  placeholder="••••••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  style={{ paddingLeft: '2.5rem' }}
-                />
-                <Lock
-                  size={16}
-                  style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
-                />
-              </div>
+              <input
+                type="password"
+                required
+                className="form-input"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
 
             <button
               type="submit"
-              className="btn btn-primary"
-              style={{ width: '100%', marginTop: '1rem', padding: '0.8rem' }}
               disabled={loading}
+              className="btn btn-primary"
+              style={{ width: '100%', marginTop: '1rem', height: '40px', fontSize: '13.5px' }}
             >
-              <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
-              {!loading && <ArrowRight size={16} />}
+              {loading ? 'Logging in...' : 'Log in'}
             </button>
           </form>
-
-          <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            Don't have an account?{' '}
-            <Link to="/register" style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>
-              Sign up for free
-            </Link>
-          </div>
         </div>
       </div>
     </div>

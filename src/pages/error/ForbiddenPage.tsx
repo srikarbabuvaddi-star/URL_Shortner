@@ -6,46 +6,45 @@ export const ForbiddenPage: React.FC = () => {
   return (
     <div
       style={{
-        minHeight: '70vh',
+        minHeight: '75vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '2rem',
-        textAlign: 'center',
+        padding: '2rem 1.5rem',
       }}
     >
-      <div className="card" style={{ maxWidth: '520px', padding: '3rem 2rem', borderColor: 'rgba(244, 63, 94, 0.3)' }}>
+      <div className="card" style={{ maxWidth: '480px', width: '100%', padding: '2.5rem', textAlign: 'center' }}>
         <div
           style={{
-            width: '64px',
-            height: '64px',
+            width: '48px',
+            height: '48px',
             borderRadius: '50%',
-            background: 'rgba(244, 63, 94, 0.15)',
-            color: '#f43f5e',
+            background: 'rgba(200, 51, 56, 0.08)',
+            color: 'var(--color-danger)',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: '1.5rem',
+            marginBottom: '1.25rem',
           }}
         >
-          <ShieldX size={32} />
+          <ShieldX size={24} />
         </div>
 
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.75rem', color: '#f43f5e' }}>
-          403 — Access Denied
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+          403 — Access Restricted
         </h1>
 
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-          You do not possess administrator credentials or permissions to access this platform administration area.
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
+          You do not have administrative permissions to view this resource. If you believe this is an error, contact your workspace administrator.
         </p>
 
         <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-          <Link to="/dashboard" className="btn btn-secondary">
-            <ArrowLeft size={16} />
-            <span>Return to User Dashboard</span>
+          <Link to="/dashboard" className="btn btn-primary">
+            <ArrowLeft size={15} />
+            <span>Go to Dashboard</span>
           </Link>
-          <Link to="/" className="btn btn-primary">
-            <Home size={16} />
+          <Link to="/" className="btn btn-secondary">
+            <Home size={15} />
             <span>Home</span>
           </Link>
         </div>

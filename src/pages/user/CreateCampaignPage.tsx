@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FolderKanban, ArrowLeft, Layers } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { campaignService } from '../../services/campaignService';
 import { useToast } from '../../context/ToastContext';
 
@@ -33,43 +33,42 @@ export const CreateCampaignPage: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '580px', margin: '0 auto' }}>
       <button
         type="button"
         onClick={() => navigate('/campaigns')}
         className="btn btn-secondary btn-sm"
-        style={{ marginBottom: '1.5rem' }}
+        style={{ marginBottom: '1.25rem' }}
       >
-        <ArrowLeft size={14} />
-        <span>Back to Campaigns</span>
+        <ArrowLeft size={13} />
+        <span>Back to campaigns</span>
       </button>
 
       <div className="page-header" style={{ marginBottom: '1.5rem' }}>
-        <div>
-          <h1 className="page-title">Create Marketing Campaign</h1>
-          <p className="page-subtitle">Organize links by initiative to compare channel attribution performance.</p>
+        <div className="page-header-text">
+          <h1 className="page-title">New campaign</h1>
+          <p className="page-subtitle">Group links and measure campaign attribution.</p>
         </div>
       </div>
 
-      <div className="card" style={{ padding: '2rem' }}>
+      <div className="card">
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">
-              Campaign Name <span style={{ color: 'var(--status-blocked)' }}>*</span>
+              Campaign name <span style={{ color: 'var(--danger)' }}>*</span>
             </label>
             <input
               type="text"
               className="form-input"
-              placeholder="e.g. College Tech Fest 2026"
+              placeholder="e.g. Summer Sale 2026"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
             />
-            <span className="form-hint">E.g. Product Launch, Black Friday, College Tech Fest 2026</span>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Campaign Description (Optional)</label>
+            <label className="form-label">Description (optional)</label>
             <textarea
               className="form-textarea"
               rows={3}
@@ -79,12 +78,12 @@ export const CreateCampaignPage: React.FC = () => {
             />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.65rem', marginTop: '1.5rem' }}>
             <button type="button" onClick={() => navigate('/campaigns')} className="btn btn-secondary">
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              <span>{loading ? 'Creating...' : 'Create Campaign'}</span>
+              <span>{loading ? 'Creating...' : 'Create campaign'}</span>
             </button>
           </div>
         </form>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Search, ShieldAlert, CheckCircle2, XCircle } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, CheckCircle2, XCircle } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import { Badge } from '../../components/Badge';
 import { Skeleton } from '../../components/Skeleton';
@@ -73,9 +73,9 @@ export const AdminUsersPage: React.FC = () => {
   return (
     <div>
       <div className="page-header">
-        <div>
-          <h1 className="page-title">User Account Governance</h1>
-          <p className="page-subtitle">Inspect user registrations, role privileges, and account status.</p>
+        <div className="page-header-text">
+          <h1 className="page-title">Users</h1>
+          <p className="page-subtitle">Platform user accounts, access levels, and moderation.</p>
         </div>
       </div>
 
@@ -83,16 +83,16 @@ export const AdminUsersPage: React.FC = () => {
       <div
         className="card"
         style={{
-          padding: '1rem 1.25rem',
-          marginBottom: '1.5rem',
+          padding: '0.85rem 1rem',
+          marginBottom: '1.25rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '1rem',
+          gap: '0.85rem',
         }}
       >
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.5rem', flex: '1', maxWidth: '400px' }}>
+        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.5rem', flex: '1', maxWidth: '380px' }}>
           <div style={{ position: 'relative', width: '100%' }}>
             <input
               type="text"
@@ -100,11 +100,11 @@ export const AdminUsersPage: React.FC = () => {
               placeholder="Search user by name or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ paddingLeft: '2.4rem', height: '40px', fontSize: '0.85rem' }}
+              style={{ paddingLeft: '2.1rem', fontSize: '13px', height: '34px' }}
             />
             <Search
-              size={15}
-              style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
+              size={14}
+              style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
             />
           </div>
           <button type="submit" className="btn btn-secondary btn-sm">
@@ -112,7 +112,8 @@ export const AdminUsersPage: React.FC = () => {
           </button>
         </form>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginRight: '0.25rem' }}>Status:</span>
           {['ALL', 'ACTIVE', 'SUSPENDED'].map((s) => (
             <button
               key={s}
@@ -122,14 +123,15 @@ export const AdminUsersPage: React.FC = () => {
                 setPage(1);
               }}
               style={{
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                borderRadius: 'var(--radius-sm)',
-                border: 'none',
+                padding: '0.3rem 0.65rem',
+                fontSize: '12px',
+                fontWeight: statusFilter === s ? 600 : 500,
+                borderRadius: 'var(--radius-xs)',
+                border: '1px solid',
+                borderColor: statusFilter === s ? 'var(--primary)' : 'var(--border-color)',
                 cursor: 'pointer',
-                background: statusFilter === s ? '#f43f5e' : 'var(--bg-tertiary)',
-                color: statusFilter === s ? '#ffffff' : 'var(--text-secondary)',
+                background: statusFilter === s ? 'var(--primary-subtle)' : '#FFFFFF',
+                color: statusFilter === s ? 'var(--primary)' : 'var(--text-secondary)',
               }}
             >
               {s}
@@ -141,71 +143,103 @@ export const AdminUsersPage: React.FC = () => {
       {/* Users Table */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         {loading ? (
-          <div style={{ padding: '2rem' }}>
-            <Skeleton height="3.5rem" style={{ marginBottom: '1rem' }} />
-            <Skeleton height="3.5rem" style={{ marginBottom: '1rem' }} />
-            <Skeleton height="3.5rem" />
+          <div style={{ padding: '1.5rem' }}>
+            <Skeleton height="36px" style={{ marginBottom: '0.75rem' }} />
+            <Skeleton height="36px" style={{ marginBottom: '0.75rem' }} />
+            <Skeleton height="36px" />
+          </div>
+        ) : users.length === 0 ? (
+          <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            No users found matching your filters.
           </div>
         ) : (
-          <div className="table-container" style={{ border: 'none', borderRadius: 0 }}>
+          <div className="table-container" style={{ border: 'none', boxShadow: 'none' }}>
             <table className="table">
               <thead>
                 <tr>
-                  <th>User Details</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Links</th>
-                  <th>Campaigns</th>
-                  <th>Joined Date</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
+                  <th>USER</th>
+                  <th>EMAIL</th>
+                  <th>ROLE</th>
+                  <th>STATUS</th>
+                  <th>CREATED</th>
+                  <th style={{ textAlign: 'right' }}>ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((u) => (
                   <tr key={u.id}>
                     <td>
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{u.name}</span>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{u.email}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                        <div
+                          style={{
+                            width: '26px',
+                            height: '26px',
+                            borderRadius: 'var(--radius-full)',
+                            background: 'var(--primary-subtle)',
+                            color: 'var(--primary)',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          {u.name?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                        <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '13px' }}>
+                          {u.name}
+                        </span>
                       </div>
                     </td>
+
                     <td>
-                      <span className={`badge ${u.role === 'ADMIN' ? 'badge-blocked' : 'badge-active'}`}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{u.email}</span>
+                    </td>
+
+                    <td>
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          padding: '0.15rem 0.4rem',
+                          borderRadius: '3px',
+                          background: u.role === 'ADMIN' ? 'var(--danger-subtle)' : 'var(--bg-tertiary)',
+                          color: u.role === 'ADMIN' ? 'var(--danger)' : 'var(--text-secondary)',
+                        }}
+                      >
                         {u.role}
                       </span>
                     </td>
+
                     <td>
                       <Badge status={u.status} />
                     </td>
+
                     <td>
-                      <strong style={{ color: 'var(--text-primary)' }}>{u._count?.links ?? 0}</strong>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '12.5px' }}>
+                        {new Date(u.createdAt).toLocaleDateString()}
+                      </span>
                     </td>
-                    <td>
-                      <strong style={{ color: 'var(--text-primary)' }}>{u._count?.campaigns ?? 0}</strong>
-                    </td>
-                    <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      {new Date(u.createdAt).toLocaleDateString()}
-                    </td>
+
                     <td style={{ textAlign: 'right' }}>
-                      {u.role !== 'ADMIN' && (
-                        u.status === 'ACTIVE' ? (
-                          <button
-                            type="button"
-                            onClick={() => handleSuspend(u)}
-                            className="btn btn-sm btn-danger"
-                          >
-                            Suspend
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleReactivate(u)}
-                            className="btn btn-sm btn-secondary"
-                            style={{ color: '#10b981' }}
-                          >
-                            Reactivate
-                          </button>
-                        )
+                      {u.status === 'ACTIVE' ? (
+                        <button
+                          type="button"
+                          onClick={() => handleSuspend(u)}
+                          className="btn btn-secondary btn-sm"
+                          style={{ color: 'var(--danger)' }}
+                        >
+                          Suspend
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleReactivate(u)}
+                          className="btn btn-secondary btn-sm"
+                          style={{ color: 'var(--success)' }}
+                        >
+                          Reactivate
+                        </button>
                       )}
                     </td>
                   </tr>
@@ -215,28 +249,28 @@ export const AdminUsersPage: React.FC = () => {
           </div>
         )}
 
-        {/* Pagination Bar */}
+        {/* Pagination */}
         {totalPages > 1 && (
           <div
             style={{
-              padding: '1rem 1.5rem',
-              borderTop: '1px solid var(--border-subtle)',
+              padding: '0.75rem 1rem',
+              borderTop: '1px solid var(--border-color)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
             }}
           >
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
               Showing {users.length} of {totalUsers} users
             </span>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.35rem' }}>
               <button
                 type="button"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
                 className="btn btn-secondary btn-sm"
               >
-                Previous
+                <ChevronLeft size={13} /> Previous
               </button>
               <button
                 type="button"
@@ -244,7 +278,7 @@ export const AdminUsersPage: React.FC = () => {
                 disabled={page >= totalPages}
                 className="btn btn-secondary btn-sm"
               >
-                Next
+                Next <ChevronRight size={13} />
               </button>
             </div>
           </div>

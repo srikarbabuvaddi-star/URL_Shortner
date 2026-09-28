@@ -6,12 +6,12 @@ interface BrowserPieChartProps {
   height?: number;
 }
 
-const PALETTE = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+const PALETTE = ['#4058EB', '#0BA5E9', '#15935A', '#B56D0A', '#626A78'];
 
-export const BrowserPieChart: React.FC<BrowserPieChartProps> = ({ data, height = 260 }) => {
+export const BrowserPieChart: React.FC<BrowserPieChartProps> = ({ data, height = 240 }) => {
   if (!data || data.length === 0) {
     return (
-      <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+      <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
         No browser metrics available.
       </div>
     );
@@ -31,19 +31,20 @@ export const BrowserPieChart: React.FC<BrowserPieChartProps> = ({ data, height =
           <YAxis
             type="category"
             dataKey="name"
-            stroke="var(--text-secondary)"
+            stroke="#626A78"
             fontSize={12}
             tickLine={false}
             axisLine={false}
-            width={80}
+            width={75}
           />
           <Tooltip
             contentStyle={{
-              background: '#0f172a',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              borderRadius: '8px',
-              color: '#f8fafc',
-              fontSize: '0.85rem',
+              background: '#FFFFFF',
+              border: '1px solid #E1E4E9',
+              borderRadius: '6px',
+              color: '#14171F',
+              fontSize: '12px',
+              boxShadow: '0 4px 12px rgba(16, 24, 40, 0.08)',
             }}
           />
           <Bar dataKey="count" name="Clicks" radius={[0, 4, 4, 0]}>

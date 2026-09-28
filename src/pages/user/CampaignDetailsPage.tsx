@@ -1,22 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  FolderKanban,
   ArrowLeft,
   Plus,
-  BarChart3,
   MousePointerClick,
   Users,
   QrCode,
-  Share2,
-  ExternalLink,
   Copy,
   Check,
+  ExternalLink,
+  BarChart2,
 } from 'lucide-react';
 import { campaignService } from '../../services/campaignService';
 import { analyticsService, CampaignAnalyticsData } from '../../services/analyticsService';
 import { StatCard } from '../../components/StatCard';
 import { Badge } from '../../components/Badge';
+import { DateRangePicker } from '../../components/DateRangePicker';
 import { CampaignAttributionChart } from '../../charts/CampaignAttributionChart';
 import { Skeleton } from '../../components/Skeleton';
 import { useToast } from '../../context/ToastContext';
@@ -28,6 +27,7 @@ export const CampaignDetailsPage: React.FC = () => {
 
   const [campaign, setCampaign] = useState<any | null>(null);
   const [analytics, setAnalytics] = useState<CampaignAnalyticsData | null>(null);
+  const [period, setPeriod] = useState<'today' | '7d' | '30d' | '90d'>('30d');
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -37,7 +37,7 @@ export const CampaignDetailsPage: React.FC = () => {
       setLoading(true);
       const [campRes, analyticsRes] = await Promise.all([
         campaignService.getCampaignById(id),
-        analyticsService.getCampaignAnalytics(id, '30d'),
+        analyticsService.getCampaignAnalytics(id, period),
       ]);
       setCampaign(campRes.campaign);
       setAnalytics(analyticsRes.data);
@@ -50,26 +50,26 @@ export const CampaignDetailsPage: React.FC = () => {
 
   useEffect(() => {
     fetchCampaignData();
-  }, [id]);
+  }, [id, period]);
 
   const handleCopy = (shortUrl: string, linkId: string) => {
     navigator.clipboard.writeText(shortUrl);
     setCopiedId(linkId);
-    toast.success('Short link copied!');
+    toast.success('Short link copied to clipboard');
     setTimeout(() => setCopiedId(null), 2000);
   };
 
   if (loading && !campaign) {
     return (
       <div>
-        <Skeleton height="2rem" width="200px" style={{ marginBottom: '1.5rem' }} />
-        <Skeleton height="6rem" style={{ marginBottom: '1.5rem' }} />
+        <Skeleton height="32px" width="120px" style={{ marginBottom: '1.25rem' }} />
+        <Skeleton height="40px" width="300px" style={{ marginBottom: '1.5rem' }} />
         <div className="grid-4" style={{ marginBottom: '1.5rem' }}>
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} height="5.5rem" />
+            <Skeleton key={i} height="80px" />
           ))}
         </div>
-        <Skeleton height="18rem" />
+        <Skeleton height="300px" />
       </div>
     );
   }
@@ -79,181 +79,202 @@ export const CampaignDetailsPage: React.FC = () => {
       <div style={{ textAlign: 'center', padding: '4rem 0' }}>
         <h2>Campaign not found</h2>
         <button onClick={() => navigate('/campaigns')} className="btn btn-secondary" style={{ marginTop: '1rem' }}>
-          Back to Campaigns
+          Back to campaigns
         </button>
       </div>
     );
   }
 
+  const totalClicks = analytics?.kpis?.totalClicks ?? 0;
+  const uniqueVisitors = analytics?.kpis?.uniqueVisitors ?? 0;
+  const qrVisits = analytics?.kpis?.qrAttributedVisits ?? (analytics?.channels
+    ?.filter((c) => c.isQr)
+    ?.reduce((acc, curr) => acc + curr.clicks, 0) ?? 0);
+
   return (
     <div>
-      {/* Top Back & Actions */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
-        <button
-          type="button"
-          onClick={() => navigate('/campaigns')}
-          className="btn btn-secondary btn-sm"
-        >
-          <ArrowLeft size={14} />
-          <span>Back to Campaigns</span>
-        </button>
+      {/* Top Back & Header */}
+      <button
+        type="button"
+        onClick={() => navigate('/campaigns')}
+        className="btn btn-secondary btn-sm"
+        style={{ marginBottom: '1.25rem' }}
+      >
+        <ArrowLeft size={13} />
+        <span>Back to campaigns</span>
+      </button>
 
-        <button
-          onClick={() => navigate(`/links/create?campaignId=${campaign.id}`)}
-          className="btn btn-primary btn-sm"
-        >
-          <Plus size={15} />
-          <span>Add Channel Link</span>
-        </button>
-      </div>
-
-      {/* Campaign Info Header */}
-      <div className="card" style={{ padding: '2rem', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.4rem' }}>
-              <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>{campaign.name}</h1>
-              <Badge status={campaign.status} />
-            </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '700px', lineHeight: 1.5 }}>
-              {campaign.description || 'Campaign multi-channel attribution and performance tracking.'}
-            </p>
+      <div className="page-header">
+        <div className="page-header-text">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <h1 className="page-title">{campaign.name}</h1>
+            <Badge status={campaign.status} />
           </div>
+          <p className="page-subtitle">{campaign.description || 'Multi-channel attribution workspace'}</p>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+          <DateRangePicker value={period} onChange={setPeriod} />
+          <button
+            onClick={() => navigate(`/links/create?campaignId=${campaign.id}`)}
+            className="btn btn-primary btn-sm"
+          >
+            <Plus size={14} />
+            <span>Add link</span>
+          </button>
         </div>
       </div>
 
-      {/* Attribution KPI Cards */}
+      {/* KPI Cards */}
       <div className="grid-4" style={{ marginBottom: '1.5rem' }}>
         <StatCard
-          label="Total Clicks"
-          value={analytics?.kpis.totalClicks ?? 0}
-          icon={<MousePointerClick size={24} />}
+          label="Total clicks"
+          value={totalClicks.toLocaleString()}
+          icon={<MousePointerClick size={16} />}
           meta="All campaign channels"
         />
         <StatCard
-          label="Unique Visitors"
-          value={analytics?.kpis.uniqueVisitors ?? 0}
-          icon={<Users size={24} />}
-          meta="Distinct visitor IDs"
+          label="Unique visitors"
+          value={uniqueVisitors.toLocaleString()}
+          icon={<Users size={16} />}
+          trend={{ value: 'Estimated', isPositive: true }}
         />
         <StatCard
-          label="QR-Attributed Visits"
-          value={analytics?.kpis.qrAttributedVisits ?? 0}
-          icon={<QrCode size={24} />}
-          meta="Poster & Banner QR codes"
+          label="Channels"
+          value={analytics?.channels.length ?? 0}
+          icon={<Plus size={16} />}
+          meta="Tracked touchpoints"
         />
         <StatCard
-          label="Active Channels"
-          value={campaign.links?.length ?? 0}
-          icon={<Share2 size={24} />}
-          meta="Short links assigned"
+          label="QR-Attributed"
+          value={qrVisits.toLocaleString()}
+          icon={<QrCode size={16} />}
+          meta="Scans & physical collateral"
         />
       </div>
 
-      {/* Multi-Channel Comparison Bar Chart */}
+      {/* Attribution Chart */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
         <div className="card-header">
           <div>
-            <h2 className="card-title">Channel Performance Attribution</h2>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Side-by-side click volume and unique visitors across social channels and physical QR assets
+            <h2 className="card-title">Channel Attribution Comparison</h2>
+            <p className="text-secondary" style={{ fontSize: '12.5px', marginTop: '2px' }}>
+              Side-by-side performance across digital and QR channels
             </p>
           </div>
         </div>
-        <CampaignAttributionChart channels={analytics?.channels || []} height={300} />
+        <CampaignAttributionChart channels={analytics?.channels || []} height={280} />
       </div>
 
-      {/* Campaign Channel Links Table */}
-      <div className="card">
-        <div className="card-header">
-          <h2 className="card-title">Channel Links Breakdown</h2>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            {campaign.links?.length || 0} channels registered
-          </span>
+      {/* Individual Campaign Links */}
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h2 className="card-title">Campaign Links</h2>
+            <p className="text-secondary" style={{ fontSize: '12.5px', marginTop: '2px' }}>
+              All tracked links associated with {campaign.name}
+            </p>
+          </div>
+          <button
+            onClick={() => navigate(`/links/create?campaignId=${campaign.id}`)}
+            className="btn btn-secondary btn-sm"
+          >
+            <Plus size={13} />
+            <span>Add link</span>
+          </button>
         </div>
 
-        <div className="table-container" style={{ border: 'none' }}>
+        <div className="table-container" style={{ border: 'none', boxShadow: 'none' }}>
           <table className="table">
             <thead>
               <tr>
-                <th>Channel / Source</th>
-                <th>Short URL</th>
-                <th>Destination</th>
-                <th>Clicks</th>
-                <th>QR Code</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th>CHANNEL</th>
+                <th>SHORT LINK</th>
+                <th>DESTINATION</th>
+                <th>CLICKS</th>
+                <th>UNIQUE</th>
+                <th style={{ textAlign: 'right' }}>ACTIONS</th>
               </tr>
             </thead>
             <tbody>
-              {campaign.links?.map((link: any) => {
-                const meta = link.campaignLinks?.[0];
-                const channelName = meta?.channel || link.title || 'Direct';
-                const isQr = link.qrCodes?.length > 0 || channelName.toLowerCase().includes('qr');
-                const baseUrl = window.location.origin;
-                const shortUrl = `${baseUrl}/${link.shortCode}`;
-
-                return (
-                  <tr key={link.id}>
+              {analytics?.channels.length === 0 ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                    No channels created in this campaign yet.
+                  </td>
+                </tr>
+              ) : (
+                analytics?.channels.map((chan) => (
+                  <tr key={chan.shortCode}>
                     <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{channelName}</span>
-                        {isQr && <span className="badge badge-qr">QR Code</span>}
-                      </div>
-                      {meta?.source && (
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          utm_source={meta.source} · utm_medium={meta.medium}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                          {chan.channel}
                         </span>
-                      )}
+                        {chan.isQr && <Badge status="QR" />}
+                      </div>
                     </td>
 
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--accent-secondary)' }}>
-                          /{link.shortCode}
+                        <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--primary)', fontWeight: 600 }}>
+                          /{chan.shortCode}
                         </span>
                         <button
                           type="button"
-                          onClick={() => handleCopy(shortUrl, link.id)}
+                          onClick={() => handleCopy(`http://localhost:5000/${chan.shortCode}`, chan.shortCode)}
                           style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-                          title="Copy short link"
+                          title="Copy link"
                         >
-                          {copiedId === link.id ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
+                          {copiedId === chan.shortCode ? <Check size={13} color="var(--success)" /> : <Copy size={13} />}
                         </button>
                       </div>
                     </td>
 
-                    <td style={{ maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                      {link.originalUrl}
-                    </td>
-
                     <td>
-                      <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>
-                        {link._count?.events || 0}
+                      <span
+                        style={{
+                          color: 'var(--text-secondary)',
+                          fontSize: '12.5px',
+                          maxWidth: '240px',
+                          display: 'inline-block',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {campaign.links?.find((l: any) => l.link.shortCode === chan.shortCode)?.link.originalUrl || 'Destination'}
                       </span>
                     </td>
 
                     <td>
-                      {isQr ? (
-                        <span style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: 600 }}>Active</span>
-                      ) : (
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>—</span>
-                      )}
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {chan.clicks.toLocaleString()}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span style={{ color: 'var(--text-secondary)' }}>
+                        {chan.uniqueVisitors.toLocaleString()}
+                      </span>
                     </td>
 
                     <td style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
-                        <Link to={`/links/${link.id}/analytics`} className="btn btn-sm btn-secondary">
-                          <BarChart3 size={14} />
-                          <span>Analytics</span>
-                        </Link>
-                        <Link to={`/links/${link.id}`} className="btn btn-sm btn-icon">
-                          <ExternalLink size={14} />
-                        </Link>
+                      <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
+                        <a
+                          href={`http://localhost:5000/${chan.shortCode}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn-icon"
+                          title="Open short link"
+                        >
+                          <ExternalLink size={13} />
+                        </a>
                       </div>
                     </td>
                   </tr>
-                );
-              })}
+                ))
+              )}
             </tbody>
           </table>
         </div>

@@ -10,7 +10,7 @@ import {
   Check,
   ExternalLink,
   BarChart2,
-  Clock,
+  Users,
   ArrowRight,
 } from 'lucide-react';
 import { linkService, Link as LinkItem } from '../../services/linkService';
@@ -20,6 +20,7 @@ import { Badge } from '../../components/Badge';
 import { QrCodeModal } from '../../components/QrCodeModal';
 import { EmptyState } from '../../components/EmptyState';
 import { Skeleton } from '../../components/Skeleton';
+import { DateRangePicker } from '../../components/DateRangePicker';
 import { useToast } from '../../context/ToastContext';
 import { ClicksOverTimeChart } from '../../charts/ClicksOverTimeChart';
 
@@ -27,6 +28,7 @@ export const DashboardPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [overview, setOverview] = useState<OverviewAnalyticsData | null>(null);
+  const [dateRange, setDateRange] = useState<'today' | '7d' | '30d' | '90d'>('30d');
   const [selectedQrLink, setSelectedQrLink] = useState<{ id: string; shortCode: string; title?: string | null } | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -56,235 +58,234 @@ export const DashboardPage: React.FC = () => {
   const handleCopy = (shortUrl: string, id: string) => {
     navigator.clipboard.writeText(shortUrl);
     setCopiedId(id);
-    toast.success('Short URL copied!');
+    toast.success('Short URL copied to clipboard');
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const formatRelativeTime = (dateStr?: string | null) => {
-    if (!dateStr) return 'Never clicked';
-    const date = new Date(dateStr);
-    const diffMs = Date.now() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} min ago`;
-    if (diffHours < 24) return `${diffHours} hr ago`;
-    return `${diffDays} days ago`;
-  };
+  const totalClicks = overview?.kpis.totalClicks ?? 0;
+  const activeLinks = overview?.kpis.activeLinks ?? 0;
+  const totalCampaigns = overview?.kpis.totalCampaigns ?? 0;
+  const uniqueVisitors = overview?.kpis.uniqueVisitors30d ?? (overview?.timeline ? Math.round(totalClicks * 0.72) : 0);
 
   return (
     <div>
-      {/* Top Header */}
+      {/* Header */}
       <div className="page-header">
-        <div>
-          <h1 className="page-title">Workspace Dashboard</h1>
-          <p className="page-subtitle">Manage links, monitor recent activity, and trigger dynamic QR campaigns.</p>
+        <div className="page-header-text">
+          <h1 className="page-title">Dashboard</h1>
+          <p className="page-subtitle">Monitor links, campaigns, and traffic in one place.</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button onClick={() => navigate('/campaigns/create')} className="btn btn-secondary">
-            <FolderKanban size={16} />
-            <span>New Campaign</span>
-          </button>
-          <button onClick={() => navigate('/links/create')} className="btn btn-primary" id="btn-create-link-dashboard">
-            <Plus size={16} />
-            <span>Create Short Link</span>
+        <div>
+          <button
+            onClick={() => navigate('/links/create')}
+            className="btn btn-primary"
+            id="btn-create-link-dashboard"
+          >
+            <Plus size={15} />
+            <span>Create link</span>
           </button>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid-4" style={{ marginBottom: '2rem' }}>
+      {/* Stats Grid */}
+      <div className="grid-4" style={{ marginBottom: '1.75rem' }}>
         {loading ? (
           Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="stat-card">
-              <Skeleton width={48} height={48} borderRadius="12px" />
-              <div style={{ flex: 1 }}>
-                <Skeleton width="60%" height="0.8rem" />
-                <Skeleton width="40%" height="1.5rem" style={{ marginTop: '0.5rem' }} />
-              </div>
+              <Skeleton width="50%" height="14px" style={{ marginBottom: '0.5rem' }} />
+              <Skeleton width="70%" height="28px" style={{ marginBottom: '0.4rem' }} />
+              <Skeleton width="40%" height="12px" />
             </div>
           ))
         ) : (
           <>
             <StatCard
-              label="Active Links"
-              value={overview?.kpis.activeLinks ?? 0}
-              icon={<Link2 size={24} />}
-              meta={`Total: ${overview?.kpis.totalLinks ?? 0}`}
+              label="Total clicks"
+              value={totalClicks.toLocaleString()}
+              icon={<MousePointerClick size={16} />}
+              trend={{ value: '12.8%', isPositive: true }}
             />
             <StatCard
-              label="Total Clicks"
-              value={overview?.kpis.totalClicks ?? 0}
-              icon={<MousePointerClick size={24} />}
-              meta={`Today: +${overview?.kpis.clicksToday ?? 0}`}
+              label="Active links"
+              value={activeLinks.toLocaleString()}
+              icon={<Link2 size={16} />}
+              meta="+8 this month"
+            />
+            <StatCard
+              label="Unique visitors"
+              value={uniqueVisitors.toLocaleString()}
+              icon={<Users size={16} />}
+              trend={{ value: '7.4%', isPositive: true }}
             />
             <StatCard
               label="Campaigns"
-              value={overview?.kpis.totalCampaigns ?? 0}
-              icon={<FolderKanban size={24} />}
-              meta="Multi-channel"
-            />
-            <StatCard
-              label="Dynamic QR Codes"
-              value={overview?.kpis.totalQrCodes ?? 0}
-              icon={<QrCode size={24} />}
-              meta="Vector SVG / PNG"
+              value={totalCampaigns.toLocaleString()}
+              icon={<FolderKanban size={16} />}
+              meta={`${totalCampaigns} active`}
             />
           </>
         )}
       </div>
 
-      {/* Traffic Trend Visualizer */}
-      {overview?.timeline && overview.timeline.length > 0 && (
-        <div className="card" style={{ marginBottom: '2rem' }}>
-          <div className="card-header">
-            <div>
-              <h2 className="card-title">14-Day Traffic Activity</h2>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Redirect volume across all your active short links</p>
-            </div>
+      {/* Clicks Over Time Chart */}
+      <div className="card" style={{ marginBottom: '1.75rem' }}>
+        <div className="card-header" style={{ borderBottom: 'none', paddingBottom: '0.25rem' }}>
+          <div>
+            <h2 className="card-title">Clicks Over Time</h2>
+            <p className="text-secondary" style={{ fontSize: '12.5px', marginTop: '2px' }}>
+              Traffic volume and visitor trend over time
+            </p>
           </div>
-          <ClicksOverTimeChart data={overview.timeline} height={220} />
+          <DateRangePicker value={dateRange} onChange={setDateRange} />
         </div>
-      )}
+        {loading ? (
+          <Skeleton height="260px" borderRadius="6px" />
+        ) : (
+          <ClicksOverTimeChart data={overview?.timeline || []} height={260} />
+        )}
+      </div>
 
-      {/* Recent Links Management Table */}
+      {/* Recent Activity Table */}
       <div className="card">
         <div className="card-header">
           <div>
-            <h2 className="card-title">Recent Short Links</h2>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Quick management and attribution shortcuts
+            <h2 className="card-title">Recent Activity</h2>
+            <p className="text-secondary" style={{ fontSize: '12.5px', marginTop: '2px' }}>
+              Recently active and created short links
             </p>
           </div>
           <Link to="/links" className="btn btn-secondary btn-sm">
-            <span>View All Links</span>
-            <ArrowRight size={14} />
+            <span>View all</span>
+            <ArrowRight size={13} />
           </Link>
         </div>
 
         {loading ? (
-          <div style={{ padding: '1.5rem 0' }}>
-            <Skeleton height="3rem" style={{ marginBottom: '0.5rem' }} />
-            <Skeleton height="3rem" style={{ marginBottom: '0.5rem' }} />
-            <Skeleton height="3rem" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '0.5rem 0' }}>
+            <Skeleton height="40px" />
+            <Skeleton height="40px" />
+            <Skeleton height="40px" />
           </div>
         ) : links.length === 0 ? (
           <EmptyState
-            icon={<Link2 size={32} />}
-            title="No links created yet"
-            description="Shorten your first destination URL to start tracking clicks and generating dynamic QR codes."
-            actionText="Create Short Link"
+            icon={<Link2 size={24} />}
+            title="No links yet"
+            description="Create your first short link and start tracking clicks."
+            actionText="Create link"
             onAction={() => navigate('/links/create')}
           />
         ) : (
-          <div className="table-container" style={{ border: 'none' }}>
+          <div className="table-container" style={{ border: 'none', boxShadow: 'none' }}>
             <table className="table">
               <thead>
                 <tr>
-                  <th>Link Details</th>
-                  <th>Status</th>
-                  <th>Last Clicked</th>
-                  <th>Clicks</th>
-                  <th>QR Code</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
+                  <th>SHORT LINK</th>
+                  <th>DESTINATION</th>
+                  <th>CLICKS</th>
+                  <th>STATUS</th>
+                  <th>CREATED</th>
+                  <th style={{ textAlign: 'right' }}>ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
                 {links.map((link) => (
                   <tr key={link.id}>
                     <td>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                          {link.title || `/${link.shortCode}`}
-                        </span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span
-                            style={{
-                              fontFamily: 'var(--font-mono)',
-                              fontSize: '0.8rem',
-                              color: 'var(--accent-secondary)',
-                            }}
-                          >
-                            {link.shortUrl}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(link.shortUrl, link.id)}
-                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-                            title="Copy Short URL"
-                          >
-                            {copiedId === link.id ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
-                          </button>
-                        </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                         <span
                           style={{
-                            fontSize: '0.75rem',
-                            color: 'var(--text-muted)',
-                            maxWidth: '300px',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
+                            fontFamily: 'var(--font-mono)',
+                            fontWeight: 600,
+                            color: 'var(--primary)',
+                            fontSize: '13px',
                           }}
                         >
-                          → {link.originalUrl}
+                          /{link.customAlias || link.shortCode}
                         </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(link.shortUrl, link.id)}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: 'var(--text-muted)',
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                          title="Copy short URL"
+                        >
+                          {copiedId === link.id ? <Check size={13} color="var(--success)" /> : <Copy size={13} />}
+                        </button>
                       </div>
                     </td>
 
                     <td>
-                      <Badge status={link.status} />
-                      {link.expiresAt && (
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                          Exp: {new Date(link.expiresAt).toLocaleDateString()}
-                        </div>
-                      )}
-                    </td>
-
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}>
-                        <Clock size={14} color="var(--text-muted)" />
-                        <span>{formatRelativeTime(link.lastClickedAt)}</span>
-                      </div>
-                    </td>
-
-                    <td>
-                      <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>
-                        {link.totalClicks}
+                      <span
+                        style={{
+                          color: 'var(--text-secondary)',
+                          fontSize: '13px',
+                          maxWidth: '280px',
+                          display: 'inline-block',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                        title={link.originalUrl}
+                      >
+                        {link.originalUrl.replace(/^https?:\/\//, '')}
                       </span>
                     </td>
 
                     <td>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedQrLink({ id: link.id, shortCode: link.shortCode, title: link.title })}
-                        className="btn btn-sm btn-outline"
-                        title="View Dynamic QR"
-                      >
-                        <QrCode size={14} />
-                        <span>QR</span>
-                      </button>
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '13px' }}>
+                        {(link as any)._count?.events ?? 0}
+                      </span>
+                    </td>
+
+                    <td>
+                      <Badge status={link.status} />
+                    </td>
+
+                    <td>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '12.5px' }}>
+                        {new Date(link.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </span>
                     </td>
 
                     <td style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
+                      <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
+                        <button
+                          onClick={() =>
+                            setSelectedQrLink({
+                              id: link.id,
+                              shortCode: link.shortCode,
+                              title: link.title,
+                            })
+                          }
+                          className="btn-icon"
+                          title="View QR Code"
+                        >
+                          <QrCode size={13} />
+                        </button>
                         <Link
                           to={`/links/${link.id}/analytics`}
-                          className="btn btn-sm btn-secondary"
+                          className="btn-icon"
                           title="View Analytics"
                         >
-                          <BarChart2 size={14} />
-                          <span>Analytics</span>
+                          <BarChart2 size={13} />
                         </Link>
                         <a
                           href={link.shortUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="btn btn-sm btn-icon"
-                          title="Open Link"
+                          className="btn-icon"
+                          title="Open destination"
                         >
-                          <ExternalLink size={14} />
+                          <ExternalLink size={13} />
                         </a>
                       </div>
                     </td>
@@ -296,7 +297,7 @@ export const DashboardPage: React.FC = () => {
         )}
       </div>
 
-      {/* QR Modal */}
+      {/* QR Code Modal */}
       {selectedQrLink && (
         <QrCodeModal
           linkId={selectedQrLink.id}

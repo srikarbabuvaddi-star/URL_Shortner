@@ -10,10 +10,9 @@ export const Navbar: React.FC = () => {
   return (
     <header
       style={{
-        height: '72px',
-        borderBottom: '1px solid var(--border-subtle)',
-        background: 'rgba(9, 13, 22, 0.85)',
-        backdropFilter: 'var(--glass-blur)',
+        height: '60px',
+        borderBottom: '1px solid var(--border-color)',
+        background: '#FFFFFF',
         position: 'sticky',
         top: 0,
         zIndex: 50,
@@ -29,70 +28,53 @@ export const Navbar: React.FC = () => {
         }}
       >
         {/* Brand Logo */}
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', textDecoration: 'none' }}>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
           <div
             style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: 'var(--accent-gradient)',
+              width: '28px',
+              height: '28px',
+              borderRadius: '6px',
+              background: 'var(--primary)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)',
             }}
           >
-            <Link2 size={20} color="#ffffff" />
+            <Link2 size={16} color="#FFFFFF" strokeWidth={2.5} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-            <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-              Link<span style={{ color: 'var(--accent-secondary)' }}>Pulse</span>
-            </span>
-            <span
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                background: '#10b981',
-                boxShadow: '0 0 8px #10b981',
-                display: 'inline-block',
-                marginLeft: '2px',
-              }}
-            />
-          </div>
+          <span style={{ fontSize: '17px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            urlly
+          </span>
         </Link>
 
         {/* Navigation Links */}
         <nav style={{ display: 'flex', alignItems: 'center', gap: '1.75rem' }}>
-          <Link to="/" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 500 }}>
+          <Link to="/" style={{ color: 'var(--text-secondary)', fontSize: '13.5px', fontWeight: 500 }}>
             Features
           </Link>
-          <Link to="/pricing" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 500 }}>
+          <Link to="/pricing" style={{ color: 'var(--text-secondary)', fontSize: '13.5px', fontWeight: 500 }}>
             Pricing
           </Link>
-          <Link to="/docs" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 500 }}>
-            API Docs
-          </Link>
-          <Link to="/about" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 500 }}>
-            About
+          <Link to="/docs" style={{ color: 'var(--text-secondary)', fontSize: '13.5px', fontWeight: 500 }}>
+            Docs
           </Link>
         </nav>
 
         {/* Right CTA */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           {user ? (
             <button onClick={() => navigate('/dashboard')} className="btn btn-primary btn-sm">
-              <User size={15} />
-              <span>Go to Dashboard</span>
+              <User size={14} />
+              <span>Dashboard</span>
             </button>
           ) : (
             <>
-              <Link to="/login" style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 600 }}>
-                Sign In
+              <Link to="/login" style={{ color: 'var(--text-primary)', fontSize: '13px', fontWeight: 500 }}>
+                Log in
               </Link>
               <Link to="/register" className="btn btn-primary btn-sm">
-                <span>Start Free</span>
-                <ArrowRight size={15} />
+                <span>Get started</span>
+                <ArrowRight size={13} />
               </Link>
             </>
           )}

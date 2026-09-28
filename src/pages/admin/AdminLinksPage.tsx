@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link2, Search, AlertTriangle, ShieldCheck, ExternalLink } from 'lucide-react';
+import { Search, AlertTriangle, ShieldCheck, ExternalLink } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import { Badge } from '../../components/Badge';
 import { Skeleton } from '../../components/Skeleton';
@@ -46,7 +46,7 @@ export const AdminLinksPage: React.FC = () => {
   };
 
   const handleBlock = async (link: any) => {
-    const reason = window.prompt(`Provide reason for blocking /${link.shortCode}:`, 'Phishing or Malware policy violation');
+    const reason = window.prompt(`Provide reason for blocking /${link.shortCode}:`, 'Phishing or Policy violation');
     if (!reason) return;
 
     try {
@@ -74,8 +74,8 @@ export const AdminLinksPage: React.FC = () => {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Platform Links Moderation</h1>
-          <p className="page-subtitle">Inspect destination targets, enforce security policies, and block abusive links.</p>
+          <h1 className="page-title">Links</h1>
+          <p className="page-subtitle">Inspect destination targets, enforce security policies, and manage short links.</p>
         </div>
       </div>
 
@@ -84,7 +84,7 @@ export const AdminLinksPage: React.FC = () => {
         className="card"
         style={{
           padding: '1rem 1.25rem',
-          marginBottom: '1.5rem',
+          marginBottom: '1.25rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -92,7 +92,7 @@ export const AdminLinksPage: React.FC = () => {
           gap: '1rem',
         }}
       >
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.5rem', flex: '1', maxWidth: '400px' }}>
+        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.5rem', flex: '1', maxWidth: '380px' }}>
           <div style={{ position: 'relative', width: '100%' }}>
             <input
               type="text"
@@ -100,11 +100,11 @@ export const AdminLinksPage: React.FC = () => {
               placeholder="Search by code, URL, or title..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ paddingLeft: '2.4rem', height: '40px', fontSize: '0.85rem' }}
+              style={{ paddingLeft: '2.25rem' }}
             />
             <Search
               size={15}
-              style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
+              style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
             />
           </div>
           <button type="submit" className="btn btn-secondary btn-sm">
@@ -112,7 +112,7 @@ export const AdminLinksPage: React.FC = () => {
           </button>
         </form>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.4rem' }}>
           {['ALL', 'ACTIVE', 'BLOCKED', 'DISABLED'].map((s) => (
             <button
               key={s}
@@ -126,10 +126,11 @@ export const AdminLinksPage: React.FC = () => {
                 fontSize: '0.75rem',
                 fontWeight: 600,
                 borderRadius: 'var(--radius-sm)',
-                border: 'none',
+                border: statusFilter === s ? '1px solid var(--color-primary)' : '1px solid var(--border-main)',
                 cursor: 'pointer',
-                background: statusFilter === s ? '#f43f5e' : 'var(--bg-tertiary)',
+                background: statusFilter === s ? 'var(--color-primary)' : 'var(--bg-card)',
                 color: statusFilter === s ? '#ffffff' : 'var(--text-secondary)',
+                transition: 'all 0.15s ease',
               }}
             >
               {s}
@@ -142,47 +143,78 @@ export const AdminLinksPage: React.FC = () => {
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         {loading ? (
           <div style={{ padding: '2rem' }}>
-            <Skeleton height="3.5rem" style={{ marginBottom: '1rem' }} />
-            <Skeleton height="3.5rem" style={{ marginBottom: '1rem' }} />
+            <Skeleton height="3.5rem" style={{ marginBottom: '0.75rem' }} />
+            <Skeleton height="3.5rem" style={{ marginBottom: '0.75rem' }} />
             <Skeleton height="3.5rem" />
+          </div>
+        ) : links.length === 0 ? (
+          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            No platform links match the current query.
           </div>
         ) : (
           <div className="table-container" style={{ border: 'none', borderRadius: 0 }}>
             <table className="table">
               <thead>
                 <tr>
-                  <th>Short Code</th>
-                  <th>Destination Target</th>
-                  <th>Owner</th>
-                  <th>Status</th>
-                  <th>Clicks</th>
-                  <th style={{ textAlign: 'right' }}>Moderation Action</th>
+                  <th>SHORT LINK</th>
+                  <th>OWNER</th>
+                  <th>DESTINATION</th>
+                  <th>STATUS</th>
+                  <th>CLICKS</th>
+                  <th>CREATED</th>
+                  <th style={{ textAlign: 'right' }}>ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
                 {links.map((link) => (
                   <tr key={link.id}>
                     <td>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-secondary)' }}>
-                        /{link.shortCode}
-                      </span>
-                    </td>
-                    <td style={{ maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
-                      <a href={link.originalUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--text-secondary)' }}>
-                        {link.originalUrl}
-                      </a>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--color-primary)' }}>
+                          urlly.app/{link.shortCode}
+                        </span>
+                        <a
+                          href={`http://localhost:5000/${link.shortCode}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          title="Open short link"
+                          style={{ color: 'var(--text-muted)' }}
+                        >
+                          <ExternalLink size={13} />
+                        </a>
+                      </div>
                     </td>
                     <td>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{link.user?.name}</span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{link.user?.email}</span>
+                        <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                          {link.user?.name || 'Anonymous'}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {link.user?.email || '—'}
+                        </span>
                       </div>
+                    </td>
+                    <td style={{ maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
+                      <a
+                        href={link.originalUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ color: 'var(--text-secondary)' }}
+                        title={link.originalUrl}
+                      >
+                        {link.originalUrl}
+                      </a>
                     </td>
                     <td>
                       <Badge status={link.status} />
                     </td>
                     <td>
-                      <strong style={{ color: 'var(--text-primary)' }}>{link.totalClicks}</strong>
+                      <strong style={{ color: 'var(--text-main)', fontSize: '0.85rem' }}>
+                        {(link.totalClicks || 0).toLocaleString()}
+                      </strong>
+                    </td>
+                    <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                      {new Date(link.createdAt).toLocaleDateString()}
                     </td>
                     <td style={{ textAlign: 'right' }}>
                       {link.status === 'BLOCKED' ? (
@@ -190,7 +222,7 @@ export const AdminLinksPage: React.FC = () => {
                           type="button"
                           onClick={() => handleUnblock(link)}
                           className="btn btn-sm btn-secondary"
-                          style={{ color: '#10b981' }}
+                          style={{ color: 'var(--color-success)', borderColor: 'var(--border-main)' }}
                         >
                           <ShieldCheck size={14} />
                           <span>Unblock</span>
@@ -202,7 +234,7 @@ export const AdminLinksPage: React.FC = () => {
                           className="btn btn-sm btn-danger"
                         >
                           <AlertTriangle size={14} />
-                          <span>Block Link</span>
+                          <span>Block</span>
                         </button>
                       )}
                     </td>
@@ -216,14 +248,14 @@ export const AdminLinksPage: React.FC = () => {
         {totalPages > 1 && (
           <div
             style={{
-              padding: '1rem 1.5rem',
-              borderTop: '1px solid var(--border-subtle)',
+              padding: '0.85rem 1.25rem',
+              borderTop: '1px solid var(--border-main)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
             }}
           >
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
               Showing {links.length} of {totalLinks} platform links
             </span>
             <div style={{ display: 'flex', gap: '0.5rem' }}>

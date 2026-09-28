@@ -42,51 +42,71 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
+  const initials = user?.name
+    ? user.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : 'U';
+
   return (
-    <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '640px', margin: '0 auto' }}>
       <div className="page-header" style={{ marginBottom: '1.5rem' }}>
-        <div>
-          <h1 className="page-title">Account Profile</h1>
-          <p className="page-subtitle">Manage your personal details, credentials, and role privileges.</p>
+        <div className="page-header-text">
+          <h1 className="page-title">Profile</h1>
+          <p className="page-subtitle">Manage your personal details and account credentials.</p>
         </div>
       </div>
 
-      <div className="card" style={{ padding: '2rem' }}>
+      <div className="card">
         {/* User Identity Banner */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '1rem',
-            paddingBottom: '1.5rem',
-            borderBottom: '1px solid var(--border-subtle)',
-            marginBottom: '1.5rem',
+            paddingBottom: '1.25rem',
+            borderBottom: '1px solid var(--border-color)',
+            marginBottom: '1.25rem',
           }}
         >
           <div
             style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '50%',
-              background: 'var(--accent-gradient)',
-              color: '#ffffff',
-              fontSize: '1.35rem',
-              fontWeight: 800,
+              width: '48px',
+              height: '48px',
+              borderRadius: 'var(--radius-full)',
+              background: 'var(--primary-subtle)',
+              color: 'var(--primary)',
+              fontSize: '16px',
+              fontWeight: 700,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            {user?.name?.[0]?.toUpperCase() || 'U'}
+            {initials}
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <h2 style={{ fontSize: '1.3rem' }}>{user?.name}</h2>
-              <span className={`badge ${user?.role === 'ADMIN' ? 'badge-blocked' : 'badge-active'}`}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                {user?.name}
+              </h2>
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  padding: '0.1rem 0.4rem',
+                  borderRadius: '3px',
+                  background: user?.role === 'ADMIN' ? 'var(--danger-subtle)' : 'var(--bg-tertiary)',
+                  color: user?.role === 'ADMIN' ? 'var(--danger)' : 'var(--text-secondary)',
+                }}
+              >
                 {user?.role}
               </span>
             </div>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{user?.email}</p>
+            <p style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>{user?.email}</p>
           </div>
         </div>
 
@@ -109,53 +129,63 @@ export const ProfilePage: React.FC = () => {
               className="form-input"
               value={user?.email || ''}
               disabled
-              style={{ opacity: 0.7, cursor: 'not-allowed' }}
+              style={{ background: 'var(--bg-primary)', color: 'var(--text-muted)' }}
             />
-            <span className="form-hint">Email address cannot be changed directly.</span>
+            <span className="form-hint">Email address cannot be changed directly</span>
           </div>
 
-          <h3 style={{ fontSize: '1.1rem', marginTop: '2rem', marginBottom: '1rem' }}>Change Password</h3>
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-color)' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
+              Change Password
+            </h3>
+            <p className="text-secondary" style={{ fontSize: '12.5px', marginBottom: '1rem' }}>
+              Leave blank if you do not want to update your password
+            </p>
 
-          <div className="form-group">
-            <label className="form-label">Current Password</label>
-            <input
-              type="password"
-              className="form-input"
-              placeholder="••••••••••••"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-            />
-          </div>
-
-          <div className="grid-2">
             <div className="form-group">
-              <label className="form-label">New Password</label>
+              <label className="form-label">Current Password</label>
               <input
                 type="password"
                 className="form-input"
-                placeholder="••••••••••••"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                minLength={8}
+                placeholder="••••••••"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
               />
             </div>
-            <div className="form-group">
-              <label className="form-label">Confirm New Password</label>
-              <input
-                type="password"
-                className="form-input"
-                placeholder="••••••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                minLength={8}
-              />
+
+            <div className="grid-2">
+              <div className="form-group">
+                <label className="form-label">New Password</label>
+                <input
+                  type="password"
+                  className="form-input"
+                  placeholder="••••••••"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Confirm Password</label>
+                <input
+                  type="password"
+                  className="form-input"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-            <button type="submit" className="btn btn-primary" disabled={saving}>
-              <Save size={15} />
-              <span>{saving ? 'Saving...' : 'Save Profile Changes'}</span>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.25rem' }}>
+            <button
+              type="submit"
+              disabled={saving}
+              className="btn btn-primary btn-sm"
+            >
+              <Save size={13} />
+              <span>{saving ? 'Saving...' : 'Save changes'}</span>
             </button>
           </div>
         </form>

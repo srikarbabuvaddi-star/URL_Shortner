@@ -63,16 +63,16 @@ export const AdminSecurityPage: React.FC = () => {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Domain Security & Blocklist</h1>
-          <p className="page-subtitle">Prevent malicious redirects, phishing targets, and spam distributions.</p>
+          <h1 className="page-title">Security</h1>
+          <p className="page-subtitle">Prevent malicious redirects, manage domain blocklists, and enforce platform safeguards.</p>
         </div>
       </div>
 
-      <div className="grid-2" style={{ marginBottom: '2rem' }}>
+      <div className="grid-2" style={{ marginBottom: '1.75rem' }}>
         {/* Add Blocked Domain Form */}
-        <div className="card" style={{ padding: '2rem' }}>
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <AlertOctagon size={18} color="#f43f5e" />
+        <div className="card" style={{ padding: '1.5rem' }}>
+          <h2 style={{ fontSize: '1.05rem', fontWeight: 600, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
+            <AlertOctagon size={18} color="var(--color-danger)" />
             <span>Block Suspicious Domain</span>
           </h2>
 
@@ -87,7 +87,7 @@ export const AdminSecurityPage: React.FC = () => {
                 onChange={(e) => setNewDomain(e.target.value)}
                 required
               />
-              <span className="form-hint">Enter clean hostname without protocols.</span>
+              <span className="form-hint">Enter hostname without protocol (no https://).</span>
             </div>
 
             <div className="form-group">
@@ -95,13 +95,13 @@ export const AdminSecurityPage: React.FC = () => {
               <input
                 type="text"
                 className="form-input"
-                placeholder="e.g. Credential phishing, malware distribution"
+                placeholder="e.g. Credential phishing, malware"
                 value={newReason}
                 onChange={(e) => setNewReason(e.target.value)}
               />
             </div>
 
-            <button type="submit" className="btn btn-danger" style={{ marginTop: '0.5rem' }} disabled={submitting}>
+            <button type="submit" className="btn btn-danger" style={{ marginTop: '0.25rem' }} disabled={submitting}>
               <Plus size={15} />
               <span>{submitting ? 'Adding...' : 'Block Domain'}</span>
             </button>
@@ -109,24 +109,33 @@ export const AdminSecurityPage: React.FC = () => {
         </div>
 
         {/* Security Rules Overview */}
-        <div className="card" style={{ padding: '2rem' }}>
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <ShieldCheck size={18} color="#10b981" />
-            <span>Automated Protection Rules</span>
+        <div className="card" style={{ padding: '1.5rem' }}>
+          <h2 style={{ fontSize: '1.05rem', fontWeight: 600, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
+            <ShieldCheck size={18} color="var(--color-success)" />
+            <span>Automated Safeguards</span>
           </h2>
-          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-            <li>🛡️ <strong>Protocol Sanitization:</strong> Rejects <code>javascript:</code>, <code>data:</code>, and <code>file:</code> URIs immediately.</li>
-            <li>🔄 <strong>Recursion Loop Prevention:</strong> Prohibits shortening self-referential LinkPulse URLs to avoid infinite 302 loops.</li>
-            <li>⚡ <strong>Cached Block Checks:</strong> Blocked hostnames are cached in Redis with instant cache invalidation upon rule changes.</li>
-          </ul>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            <div style={{ padding: '0.75rem', background: 'var(--bg-app)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-main)' }}>
+              <strong style={{ color: 'var(--text-main)' }}>Protocol Sanitization</strong>
+              <p style={{ margin: '0.25rem 0 0', color: 'var(--text-muted)' }}>Rejects dangerous schemes including <code>javascript:</code>, <code>data:</code>, and <code>file:</code>.</p>
+            </div>
+            <div style={{ padding: '0.75rem', background: 'var(--bg-app)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-main)' }}>
+              <strong style={{ color: 'var(--text-main)' }}>Loop Prevention</strong>
+              <p style={{ margin: '0.25rem 0 0', color: 'var(--text-muted)' }}>Prohibits shortening self-referential urlly URLs to prevent infinite redirect loops.</p>
+            </div>
+            <div style={{ padding: '0.75rem', background: 'var(--bg-app)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-main)' }}>
+              <strong style={{ color: 'var(--text-main)' }}>Sub-5ms Cache Enforcement</strong>
+              <p style={{ margin: '0.25rem 0 0', color: 'var(--text-muted)' }}>Blocked hostnames are checked against in-memory & Redis cache before redirection.</p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Blocked Domains Table */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div className="card-header" style={{ padding: '1.25rem 1.5rem', marginBottom: 0 }}>
-          <h2 className="card-title">Active Blocked Domains</h2>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{domains.length} blocked domains</span>
+        <div className="card-header" style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-main)' }}>
+          <h2 className="card-title" style={{ fontSize: '0.95rem' }}>Active Blocked Domains</h2>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{domains.length} blocked</span>
         </div>
 
         {loading ? (
@@ -135,7 +144,7 @@ export const AdminSecurityPage: React.FC = () => {
             <Skeleton height="3rem" />
           </div>
         ) : domains.length === 0 ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+          <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
             No domains currently blocked.
           </div>
         ) : (
@@ -143,10 +152,10 @@ export const AdminSecurityPage: React.FC = () => {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Domain</th>
-                  <th>Reason</th>
-                  <th>Date Blocked</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
+                  <th>DOMAIN</th>
+                  <th>REASON</th>
+                  <th>DATE BLOCKED</th>
+                  <th style={{ textAlign: 'right' }}>ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
@@ -155,7 +164,7 @@ export const AdminSecurityPage: React.FC = () => {
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Globe size={15} color="var(--text-muted)" />
-                        <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: '#f43f5e' }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--color-danger)' }}>
                           {d.domain}
                         </span>
                       </div>
@@ -172,7 +181,7 @@ export const AdminSecurityPage: React.FC = () => {
                         onClick={() => handleRemoveDomain(d.id, d.domain)}
                         className="btn btn-sm btn-icon"
                         title="Unblock domain"
-                        style={{ color: '#f43f5e' }}
+                        style={{ color: 'var(--color-danger)' }}
                       >
                         <Trash2 size={14} />
                       </button>

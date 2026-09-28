@@ -13,7 +13,7 @@ export const AppLayout: React.FC = () => {
       <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
           <div className="skeleton" style={{ width: '48px', height: '48px', borderRadius: '50%' }} />
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading LinkPulse workspace...</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading workspace...</p>
         </div>
       </div>
     );

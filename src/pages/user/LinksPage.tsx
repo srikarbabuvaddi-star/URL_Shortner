@@ -11,7 +11,9 @@ import {
   QrCode,
   Power,
   Trash2,
-  Edit3,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
 } from 'lucide-react';
 import { linkService, Link as LinkItem } from '../../services/linkService';
 import { Badge } from '../../components/Badge';
@@ -67,7 +69,7 @@ export const LinksPage: React.FC = () => {
   const handleCopy = (shortUrl: string, id: string) => {
     navigator.clipboard.writeText(shortUrl);
     setCopiedId(id);
-    toast.success('Short URL copied!');
+    toast.success('Short link copied to clipboard');
     setTimeout(() => setCopiedId(null), 2000);
   };
 
@@ -75,10 +77,10 @@ export const LinksPage: React.FC = () => {
     try {
       if (link.status === 'ACTIVE') {
         await linkService.disableLink(link.id);
-        toast.info(`Link /${link.shortCode} disabled`);
+        toast.info(`Link /${link.shortCode} paused`);
       } else {
         await linkService.enableLink(link.id);
-        toast.success(`Link /${link.shortCode} enabled`);
+        toast.success(`Link /${link.shortCode} activated`);
       }
       fetchLinks();
     } catch (err: any) {
@@ -87,7 +89,7 @@ export const LinksPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string, shortCode: string) => {
-    if (!window.confirm(`Are you sure you want to permanently delete /${shortCode}? This action cannot be undone.`)) {
+    if (!window.confirm(`Are you sure you want to permanently delete /${shortCode}?`)) {
       return;
     }
     try {
@@ -103,13 +105,17 @@ export const LinksPage: React.FC = () => {
     <div>
       {/* Page Header */}
       <div className="page-header">
-        <div>
-          <h1 className="page-title">Short Links</h1>
-          <p className="page-subtitle">All shortened links, custom aliases, QR codes, and tracking parameters.</p>
+        <div className="page-header-text">
+          <h1 className="page-title">Links</h1>
+          <p className="page-subtitle">Create, organize, and manage all your short links.</p>
         </div>
-        <button onClick={() => navigate('/links/create')} className="btn btn-primary" id="btn-create-link">
-          <Plus size={16} />
-          <span>Create Short Link</span>
+        <button
+          onClick={() => navigate('/links/create')}
+          className="btn btn-primary"
+          id="btn-create-link"
+        >
+          <Plus size={15} />
+          <span>Create link</span>
         </button>
       </div>
 
@@ -117,28 +123,28 @@ export const LinksPage: React.FC = () => {
       <div
         className="card"
         style={{
-          padding: '1rem 1.25rem',
-          marginBottom: '1.5rem',
+          padding: '0.85rem 1rem',
+          marginBottom: '1.25rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '1rem',
+          gap: '0.85rem',
         }}
       >
-        <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '0.5rem', flex: '1', maxWidth: '400px' }}>
+        <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '0.5rem', flex: '1', maxWidth: '380px' }}>
           <div style={{ position: 'relative', width: '100%' }}>
             <input
               type="text"
               className="form-input"
-              placeholder="Search by title, short code, or URL..."
+              placeholder="Search by slug, title, or URL..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ paddingLeft: '2.4rem', height: '40px', fontSize: '0.85rem' }}
+              style={{ paddingLeft: '2.1rem', fontSize: '13px', height: '34px' }}
             />
             <Search
-              size={15}
-              style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
+              size={14}
+              style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
             />
           </div>
           <button type="submit" className="btn btn-secondary btn-sm">
@@ -146,28 +152,34 @@ export const LinksPage: React.FC = () => {
           </button>
         </form>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Status:</span>
-          {['ALL', 'ACTIVE', 'DISABLED', 'EXPIRED'].map((s) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginRight: '0.25rem' }}>Status:</span>
+          {[
+            { label: 'All', value: 'ALL' },
+            { label: 'Active', value: 'ACTIVE' },
+            { label: 'Disabled', value: 'DISABLED' },
+            { label: 'Expired', value: 'EXPIRED' },
+          ].map((s) => (
             <button
-              key={s}
+              key={s.value}
               type="button"
               onClick={() => {
-                setStatusFilter(s);
+                setStatusFilter(s.value);
                 setPage(1);
               }}
               style={{
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                borderRadius: 'var(--radius-sm)',
-                border: 'none',
+                padding: '0.3rem 0.65rem',
+                fontSize: '12px',
+                fontWeight: statusFilter === s.value ? 600 : 500,
+                borderRadius: 'var(--radius-xs)',
+                border: '1px solid',
+                borderColor: statusFilter === s.value ? 'var(--primary)' : 'var(--border-color)',
                 cursor: 'pointer',
-                background: statusFilter === s ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
-                color: statusFilter === s ? '#ffffff' : 'var(--text-secondary)',
+                background: statusFilter === s.value ? 'var(--primary-subtle)' : '#FFFFFF',
+                color: statusFilter === s.value ? 'var(--primary)' : 'var(--text-secondary)',
               }}
             >
-              {s}
+              {s.label}
             </button>
           ))}
         </div>
@@ -176,18 +188,18 @@ export const LinksPage: React.FC = () => {
       {/* Links Table */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         {loading ? (
-          <div style={{ padding: '2rem' }}>
-            <Skeleton height="3.5rem" style={{ marginBottom: '1rem' }} />
-            <Skeleton height="3.5rem" style={{ marginBottom: '1rem' }} />
-            <Skeleton height="3.5rem" />
+          <div style={{ padding: '1.5rem' }}>
+            <Skeleton height="36px" style={{ marginBottom: '0.75rem' }} />
+            <Skeleton height="36px" style={{ marginBottom: '0.75rem' }} />
+            <Skeleton height="36px" />
           </div>
         ) : links.length === 0 ? (
           <div style={{ padding: '2rem' }}>
             <EmptyState
-              icon={<Link2 size={32} />}
-              title="No short links found"
-              description={search ? `No links matching "${search}"` : 'Create your first short link to start tracking traffic.'}
-              actionText={search ? 'Clear Search' : 'Create Short Link'}
+              icon={<Link2 size={24} />}
+              title="No links yet"
+              description={search ? `No links matching "${search}"` : 'Create your first short link and start tracking clicks.'}
+              actionText={search ? 'Clear search' : 'Create link'}
               onAction={() => {
                 if (search) {
                   setSearch('');
@@ -199,122 +211,134 @@ export const LinksPage: React.FC = () => {
             />
           </div>
         ) : (
-          <div className="table-container" style={{ border: 'none', borderRadius: 0 }}>
+          <div className="table-container" style={{ border: 'none', boxShadow: 'none' }}>
             <table className="table">
               <thead>
                 <tr>
-                  <th>Destination & Short URL</th>
-                  <th>Status</th>
-                  <th>Created</th>
-                  <th>Clicks</th>
-                  <th>QR Code</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
+                  <th>SHORT LINK</th>
+                  <th>DESTINATION</th>
+                  <th>CLICKS</th>
+                  <th>STATUS</th>
+                  <th>CREATED</th>
+                  <th style={{ textAlign: 'right' }}>ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
                 {links.map((link) => (
                   <tr key={link.id}>
                     <td>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                        <Link
-                          to={`/links/${link.id}`}
-                          style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.95rem' }}
-                        >
-                          {link.title || `/${link.shortCode}`}
-                        </Link>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--accent-secondary)' }}>
-                            {link.shortUrl}
-                          </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                          <Link
+                            to={`/links/${link.id}`}
+                            style={{
+                              fontFamily: 'var(--font-mono)',
+                              fontWeight: 600,
+                              color: 'var(--primary)',
+                              fontSize: '13px',
+                            }}
+                          >
+                            /{link.customAlias || link.shortCode}
+                          </Link>
                           <button
                             type="button"
                             onClick={() => handleCopy(link.shortUrl, link.id)}
                             style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-                            title="Copy Short URL"
+                            title="Copy link"
                           >
-                            {copiedId === link.id ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
+                            {copiedId === link.id ? <Check size={13} color="var(--success)" /> : <Copy size={13} />}
                           </button>
                         </div>
-                        <span
-                          style={{
-                            fontSize: '0.75rem',
-                            color: 'var(--text-muted)',
-                            maxWidth: '360px',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          → {link.originalUrl}
-                        </span>
+                        {link.title && (
+                          <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+                            {link.title}
+                          </span>
+                        )}
                       </div>
                     </td>
 
                     <td>
-                      <Badge status={link.status} />
-                      {link.expiresAt && (
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                          Expires: {new Date(link.expiresAt).toLocaleDateString()}
-                        </div>
-                      )}
-                    </td>
-
-                    <td>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                        {new Date(link.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-primary)' }}>
-                        {link.totalClicks}
-                      </span>
-                    </td>
-
-                    <td>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedQr({ id: link.id, shortCode: link.shortCode, title: link.title })}
-                        className="btn btn-sm btn-outline"
+                      <span
+                        style={{
+                          color: 'var(--text-secondary)',
+                          fontSize: '13px',
+                          maxWidth: '300px',
+                          display: 'inline-block',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                        title={link.originalUrl}
                       >
-                        <QrCode size={14} />
-                        <span>QR</span>
-                      </button>
+                        {link.originalUrl.replace(/^https?:\/\//, '')}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '13px' }}>
+                        {((link as any)._count?.events ?? 0).toLocaleString()}
+                      </span>
+                    </td>
+
+                    <td>
+                      <Badge status={link.status} />
+                    </td>
+
+                    <td>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '12.5px' }}>
+                        {new Date(link.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </span>
                     </td>
 
                     <td style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
-                        <Link
-                          to={`/links/${link.id}/analytics`}
-                          className="btn btn-sm btn-secondary"
-                          title="View Analytics"
-                        >
-                          <BarChart2 size={14} />
-                        </Link>
+                      <div style={{ display: 'inline-flex', gap: '0.3rem' }}>
                         <Link
                           to={`/links/${link.id}`}
-                          className="btn btn-sm btn-icon"
-                          title="Edit Link Details"
+                          className="btn-icon"
+                          title="View details"
                         >
-                          <Edit3 size={14} />
+                          <Eye size={13} />
+                        </Link>
+                        <Link
+                          to={`/links/${link.id}/analytics`}
+                          className="btn-icon"
+                          title="View analytics"
+                        >
+                          <BarChart2 size={13} />
                         </Link>
                         <button
                           type="button"
-                          onClick={() => handleToggleStatus(link)}
-                          className="btn btn-sm btn-icon"
-                          title={link.status === 'ACTIVE' ? 'Disable Link' : 'Enable Link'}
-                          style={{ color: link.status === 'ACTIVE' ? '#10b981' : 'var(--text-muted)' }}
+                          onClick={() =>
+                            setSelectedQr({
+                              id: link.id,
+                              shortCode: link.shortCode,
+                              title: link.title,
+                            })
+                          }
+                          className="btn-icon"
+                          title="Generate QR code"
                         >
-                          <Power size={14} />
+                          <QrCode size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleStatus(link)}
+                          className="btn-icon"
+                          title={link.status === 'ACTIVE' ? 'Pause link' : 'Enable link'}
+                        >
+                          <Power size={13} color={link.status === 'ACTIVE' ? 'var(--warning)' : 'var(--success)'} />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDelete(link.id, link.shortCode)}
-                          className="btn btn-sm btn-icon"
-                          title="Delete Link"
-                          style={{ color: '#f43f5e' }}
+                          className="btn-icon"
+                          title="Delete link"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={13} color="var(--danger)" />
                         </button>
                       </div>
                     </td>
@@ -325,46 +349,43 @@ export const LinksPage: React.FC = () => {
           </div>
         )}
 
-        {/* Pagination Bar */}
+        {/* Pagination */}
         {totalPages > 1 && (
           <div
             style={{
-              padding: '1rem 1.5rem',
-              borderTop: '1px solid var(--border-subtle)',
+              padding: '0.75rem 1rem',
+              borderTop: '1px solid var(--border-color)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
             }}
           >
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
               Showing {links.length} of {totalLinks} links
             </span>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.35rem' }}>
               <button
                 type="button"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
                 className="btn btn-secondary btn-sm"
               >
-                Previous
+                <ChevronLeft size={13} /> Previous
               </button>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', alignSelf: 'center', padding: '0 0.5rem' }}>
-                Page {page} of {totalPages}
-              </span>
               <button
                 type="button"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
                 className="btn btn-secondary btn-sm"
               >
-                Next
+                Next <ChevronRight size={13} />
               </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* QR Modal */}
+      {/* QR Code Modal */}
       {selectedQr && (
         <QrCodeModal
           linkId={selectedQr.id}

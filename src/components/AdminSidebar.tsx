@@ -1,87 +1,93 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import {
-  ShieldAlert,
+  LayoutDashboard,
   Users,
   Link2,
-  FolderKanban,
-  BarChart3,
-  ShieldCheck,
   FileText,
+  ShieldCheck,
   Activity,
   ArrowLeft,
 } from 'lucide-react';
 
 export const AdminSidebar: React.FC = () => {
   const adminNavItems = [
-    { to: '/admin', end: true, label: 'Overview', icon: <ShieldAlert size={18} /> },
-    { to: '/admin/users', label: 'Users', icon: <Users size={18} /> },
-    { to: '/admin/links', label: 'Platform Links', icon: <Link2 size={18} /> },
-    { to: '/admin/campaigns', label: 'Campaigns', icon: <FolderKanban size={18} /> },
-    { to: '/admin/analytics', label: 'Global Traffic', icon: <BarChart3 size={18} /> },
-    { to: '/admin/security', label: 'Security & Domains', icon: <ShieldCheck size={18} /> },
-    { to: '/admin/audit-logs', label: 'Audit Logs', icon: <FileText size={18} /> },
-    { to: '/admin/system', label: 'System Health', icon: <Activity size={18} /> },
+    { to: '/admin', end: true, label: 'Overview', icon: <LayoutDashboard size={16} /> },
+    { to: '/admin/users', label: 'Users', icon: <Users size={16} /> },
+    { to: '/admin/links', label: 'Links', icon: <Link2 size={16} /> },
+    { to: '/admin/audit-logs', label: 'Audit Logs', icon: <FileText size={16} /> },
+    { to: '/admin/security', label: 'Security', icon: <ShieldCheck size={16} /> },
+    { to: '/admin/system', label: 'System', icon: <Activity size={16} /> },
   ];
 
   return (
-    <aside className="app-sidebar" style={{ borderRight: '1px solid rgba(244, 63, 94, 0.2)' }}>
-      {/* Brand header with Admin Shield */}
+    <aside className="app-sidebar" style={{ borderRight: '1px solid var(--border-color)' }}>
+      {/* Brand Header */}
       <div
         style={{
-          height: '64px',
+          height: '56px',
           display: 'flex',
           alignItems: 'center',
           gap: '0.65rem',
-          padding: '0 1.5rem',
-          borderBottom: '1px solid var(--border-subtle)',
-          background: 'rgba(244, 63, 94, 0.05)',
+          padding: '0 1.25rem',
+          borderBottom: '1px solid var(--border-color)',
         }}
       >
         <div
           style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '8px',
-            background: 'linear-gradient(135deg, #f43f5e 0%, #be123c 100%)',
+            width: '26px',
+            height: '26px',
+            borderRadius: '6px',
+            background: 'var(--text-primary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(244, 63, 94, 0.4)',
           }}
         >
-          <ShieldAlert size={18} color="#ffffff" />
+          <ShieldCheck size={14} color="#FFFFFF" strokeWidth={2.5} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-            Admin<span style={{ color: '#f43f5e' }}>Center</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>
+            urlly
           </span>
-          <span style={{ fontSize: '0.65rem', color: '#f43f5e', fontWeight: 700, letterSpacing: '0.05em' }}>
-            SUPERUSER PRIVILEGES
+          <span
+            style={{
+              fontSize: '10px',
+              fontWeight: 700,
+              padding: '0.15rem 0.4rem',
+              borderRadius: '4px',
+              background: 'var(--danger-subtle)',
+              color: 'var(--danger)',
+              border: '1px solid rgba(200, 51, 56, 0.2)',
+              letterSpacing: '0.04em',
+            }}
+          >
+            ADMIN
           </span>
         </div>
       </div>
 
       {/* Nav items list */}
-      <div style={{ flex: 1, padding: '1.25rem 1rem', overflowY: 'auto' }}>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 0.5rem 0.6rem' }}>
-          Platform Controls
+      <div style={{ flex: 1, padding: '1rem 0.75rem', overflowY: 'auto' }}>
+        <div
+          style={{
+            fontSize: '11px',
+            fontWeight: 600,
+            color: 'var(--text-muted)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            padding: '0.25rem 0.5rem 0.45rem',
+          }}
+        >
+          Administration
         </div>
-        <nav style={{ display: 'flex', flexDirection: 'column' }}>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
           {adminNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
               className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-              style={({ isActive }) =>
-                isActive
-                  ? {
-                      background: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)',
-                      boxShadow: '0 4px 12px rgba(244, 63, 94, 0.3)',
-                    }
-                  : {}
-              }
             >
               {item.icon}
               <span>{item.label}</span>
@@ -93,8 +99,9 @@ export const AdminSidebar: React.FC = () => {
       {/* Return to Normal App */}
       <div
         style={{
-          padding: '1rem',
-          borderTop: '1px solid var(--border-subtle)',
+          padding: '0.75rem',
+          borderTop: '1px solid var(--border-color)',
+          background: '#FAFBFC',
         }}
       >
         <Link
@@ -102,8 +109,8 @@ export const AdminSidebar: React.FC = () => {
           className="btn btn-secondary btn-sm"
           style={{ width: '100%', justifyContent: 'center' }}
         >
-          <ArrowLeft size={14} />
-          <span>Return to User App</span>
+          <ArrowLeft size={13} />
+          <span>Exit to App</span>
         </Link>
       </div>
     </aside>

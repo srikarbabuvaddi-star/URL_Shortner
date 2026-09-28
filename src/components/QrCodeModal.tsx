@@ -63,7 +63,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
   };
 
   const handleDownload = (format: 'png' | 'svg') => {
-    qrService.downloadQr(linkId, format, `linkpulse-${shortCode}`);
+    qrService.downloadQr(linkId, format, `urlly-${shortCode}`);
     toast.success(`Downloaded QR Code (${format.toUpperCase()})`);
   };
 
@@ -72,23 +72,23 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Dynamic QR Code</h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{title || `/${shortCode}`}</p>
+            <h3 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>Dynamic QR Code</h3>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{title || `/${shortCode}`}</p>
           </div>
           <button
             onClick={onClose}
             className="btn-icon"
-            style={{ borderRadius: 'var(--radius-full)' }}
+            style={{ borderRadius: 'var(--radius-sm)' }}
             aria-label="Close modal"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
         <div className="modal-body" style={{ textAlign: 'center' }}>
           {loading ? (
-            <div style={{ padding: '3rem 0', display: 'flex', justifyContent: 'center' }}>
-              <div className="skeleton" style={{ width: '220px', height: '220px', borderRadius: '12px' }} />
+            <div style={{ padding: '2.5rem 0', display: 'flex', justifyContent: 'center' }}>
+              <div className="skeleton" style={{ width: '200px', height: '200px', borderRadius: '8px' }} />
             </div>
           ) : qrData ? (
             <div>
@@ -96,17 +96,18 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
               <div
                 style={{
                   display: 'inline-block',
-                  background: '#ffffff',
+                  background: '#FFFFFF',
                   padding: '1rem',
-                  borderRadius: 'var(--radius-lg)',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.4)',
-                  marginBottom: '1.5rem',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-md)',
+                  boxShadow: 'var(--shadow-sm)',
+                  marginBottom: '1.25rem',
                 }}
               >
                 <img
                   src={qrData.pngDataUrl}
                   alt={`QR Code for ${shortCode}`}
-                  style={{ width: '220px', height: '220px', display: 'block' }}
+                  style={{ width: '200px', height: '200px', display: 'block' }}
                 />
               </div>
 
@@ -116,11 +117,11 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   background: 'var(--bg-primary)',
-                  padding: '0.6rem 0.9rem',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border-subtle)',
-                  marginBottom: '1rem',
-                  gap: '0.75rem',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-color)',
+                  marginBottom: '0.85rem',
+                  gap: '0.5rem',
                 }}
               >
                 <span
@@ -128,8 +129,8 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
                     flex: 1,
                     textAlign: 'left',
                     fontFamily: 'var(--font-mono)',
-                    fontSize: '0.85rem',
-                    color: 'var(--accent-secondary)',
+                    fontSize: '12px',
+                    color: 'var(--primary)',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
@@ -144,7 +145,7 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
                   className="btn btn-sm btn-secondary"
                   title="Copy short link"
                 >
-                  {copied ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
+                  {copied ? <Check size={13} color="var(--success)" /> : <Copy size={13} />}
                   <span>{copied ? 'Copied' : 'Copy'}</span>
                 </button>
 
@@ -153,25 +154,24 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
                   target="_blank"
                   rel="noreferrer"
                   className="btn btn-sm btn-outline"
-                  title="Test short link"
+                  title="Open short link"
                 >
-                  <ExternalLink size={14} />
+                  <ExternalLink size={13} />
                 </a>
               </div>
 
               {/* Dynamic Note */}
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
-                💡 <strong>Dynamic QR Code:</strong> Points directly to your short link. If you change the
-                destination URL in the future, this exact printed QR code will continue to work seamlessly.
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+                Points to your short URL. If destination changes later, this exact printed QR code continues working.
               </p>
             </div>
           ) : (
-            <p style={{ color: 'var(--status-blocked)' }}>Unable to render QR code.</p>
+            <p style={{ color: 'var(--danger)' }}>Unable to render QR code.</p>
           )}
         </div>
 
-        <div className="modal-footer" style={{ justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', alignSelf: 'center' }}>
+        <div className="modal-footer" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
             Downloads: {qrData?.downloadCount || 0}
           </span>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -181,8 +181,8 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
               className="btn btn-secondary btn-sm"
               disabled={loading || !qrData}
             >
-              <Download size={14} />
-              <span>Download PNG</span>
+              <Download size={13} />
+              <span>PNG</span>
             </button>
             <button
               type="button"
@@ -190,8 +190,8 @@ export const QrCodeModal: React.FC<QrCodeModalProps> = ({
               className="btn btn-primary btn-sm"
               disabled={loading || !qrData}
             >
-              <Download size={14} />
-              <span>Download SVG</span>
+              <Download size={13} />
+              <span>SVG</span>
             </button>
           </div>
         </div>

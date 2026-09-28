@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  Link2,
   ArrowLeft,
   Copy,
   Check,
   ExternalLink,
   BarChart2,
-  Clock,
   Calendar,
   Save,
   Power,
   Trash2,
-  QrCode,
   Download,
 } from 'lucide-react';
 import { linkService, Link as LinkItem } from '../../services/linkService';
@@ -71,7 +68,7 @@ export const LinkDetailsPage: React.FC = () => {
     if (!link) return;
     navigator.clipboard.writeText(link.shortUrl);
     setCopied(true);
-    toast.success('Short link copied to clipboard!');
+    toast.success('Short link copied to clipboard');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -101,21 +98,22 @@ export const LinkDetailsPage: React.FC = () => {
       if (link.status === 'ACTIVE') {
         const res = await linkService.disableLink(link.id);
         setLink(res.link);
-        toast.info('Link is now disabled');
+        toast.info('Link paused');
       } else {
         const res = await linkService.enableLink(link.id);
         setLink(res.link);
-        toast.success('Link is now active');
+        toast.success('Link activated');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to toggle status');
+      toast.error(err.message || 'Failed to update status');
     }
   };
 
   const handleDelete = async () => {
     if (!link) return;
-    if (!window.confirm(`Permanently delete /${link.shortCode}?`)) return;
-
+    if (!window.confirm(`Are you sure you want to permanently delete /${link.shortCode}?`)) {
+      return;
+    }
     try {
       await linkService.deleteLink(link.id);
       toast.success('Link deleted successfully');
@@ -127,219 +125,249 @@ export const LinkDetailsPage: React.FC = () => {
 
   const handleDownloadQr = (format: 'png' | 'svg') => {
     if (!link) return;
-    qrService.downloadQr(link.id, format, `linkpulse-${link.shortCode}`);
+    qrService.downloadQr(link.id, format, `urlly-${link.shortCode}`);
     toast.success(`Downloaded QR Code (${format.toUpperCase()})`);
   };
 
   if (loading) {
     return (
-      <div style={{ maxWidth: '960px', margin: '0 auto' }}>
-        <Skeleton height="2rem" width="200px" style={{ marginBottom: '1.5rem' }} />
-        <Skeleton height="15rem" style={{ marginBottom: '1.5rem' }} />
-        <Skeleton height="12rem" />
+      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+        <Skeleton height="36px" width="120px" style={{ marginBottom: '1.5rem' }} />
+        <div className="grid-2">
+          <Skeleton height="350px" />
+          <Skeleton height="350px" />
+        </div>
       </div>
     );
   }
 
   if (!link) {
     return (
-      <div style={{ textAlign: 'center', padding: '4rem 0' }}>
+      <div style={{ maxWidth: '600px', margin: '3rem auto', textAlign: 'center' }}>
         <h2>Link not found</h2>
-        <button onClick={() => navigate('/links')} className="btn btn-secondary" style={{ marginTop: '1rem' }}>
-          Back to Links
-        </button>
+        <p className="text-secondary" style={{ marginTop: '0.5rem', marginBottom: '1.5rem' }}>
+          This link may have been deleted or you do not have permission to view it.
+        </p>
+        <Link to="/links" className="btn btn-primary">
+          Back to links
+        </Link>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '1080px', margin: '0 auto' }}>
+      {/* Back button */}
       <button
         type="button"
         onClick={() => navigate('/links')}
         className="btn btn-secondary btn-sm"
-        style={{ marginBottom: '1.5rem' }}
+        style={{ marginBottom: '1.25rem' }}
       >
-        <ArrowLeft size={14} />
-        <span>Back to Links</span>
+        <ArrowLeft size={13} />
+        <span>Back to links</span>
       </button>
 
-      {/* Top Banner */}
-      <div className="card" style={{ marginBottom: '1.5rem', padding: '1.75rem 2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.4rem' }}>
-              <h1 style={{ fontSize: '1.6rem', fontWeight: 800 }}>{link.title || `/${link.shortCode}`}</h1>
-              <Badge status={link.status} />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--accent-secondary)' }}>
-                {link.shortUrl}
-              </span>
-              <button onClick={handleCopy} className="btn btn-sm btn-secondary">
-                {copied ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
-                <span>{copied ? 'Copied' : 'Copy'}</span>
-              </button>
-              <a href={link.shortUrl} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline">
-                <ExternalLink size={14} />
-              </a>
-            </div>
+      {/* Header */}
+      <div className="page-header">
+        <div className="page-header-text">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <h1 className="page-title" style={{ fontFamily: 'var(--font-mono)' }}>
+              /{link.customAlias || link.shortCode}
+            </h1>
+            <Badge status={link.status} />
           </div>
-
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <Link to={`/links/${link.id}/analytics`} className="btn btn-primary btn-sm">
-              <BarChart2 size={16} />
-              <span>View Analytics</span>
-            </Link>
-            <button
-              onClick={handleToggleStatus}
-              className="btn btn-secondary btn-sm"
-              style={{ color: link.status === 'ACTIVE' ? 'var(--status-blocked)' : '#10b981' }}
-            >
-              <Power size={14} />
-              <span>{link.status === 'ACTIVE' ? 'Disable' : 'Enable'}</span>
-            </button>
-            <button onClick={handleDelete} className="btn btn-danger btn-sm">
-              <Trash2 size={14} />
-            </button>
-          </div>
+          <p className="page-subtitle">{link.title || 'Untitled Short Link'}</p>
         </div>
 
-        {/* Quick Meta Stats Bar */}
-        <div
-          style={{
-            display: 'flex',
-            gap: '2rem',
-            borderTop: '1px solid var(--border-subtle)',
-            marginTop: '1.5rem',
-            paddingTop: '1rem',
-            fontSize: '0.85rem',
-            color: 'var(--text-secondary)',
-            flexWrap: 'wrap',
-          }}
-        >
-          <div>
-            <span style={{ color: 'var(--text-muted)' }}>Total Clicks: </span>
-            <strong style={{ color: 'var(--text-primary)' }}>{link.totalClicks}</strong>
-          </div>
-          <div>
-            <span style={{ color: 'var(--text-muted)' }}>Created: </span>
-            <strong style={{ color: 'var(--text-primary)' }}>{new Date(link.createdAt).toLocaleDateString()}</strong>
-          </div>
-          <div>
-            <span style={{ color: 'var(--text-muted)' }}>Last Activity: </span>
-            <strong style={{ color: 'var(--text-primary)' }}>
-              {link.lastClickedAt ? new Date(link.lastClickedAt).toLocaleString() : 'No clicks yet'}
-            </strong>
-          </div>
-          {link.campaignName && (
-            <div>
-              <span style={{ color: 'var(--text-muted)' }}>Campaign: </span>
-              <strong style={{ color: 'var(--accent-primary)' }}>{link.campaignName}</strong>
-            </div>
-          )}
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button onClick={handleCopy} className="btn btn-secondary btn-sm">
+            {copied ? <Check size={13} color="var(--success)" /> : <Copy size={13} />}
+            <span>{copied ? 'Copied' : 'Copy link'}</span>
+          </button>
+          <a
+            href={link.shortUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-secondary btn-sm"
+          >
+            <ExternalLink size={13} />
+            <span>Open</span>
+          </a>
+          <Link to={`/links/${link.id}/analytics`} className="btn btn-primary btn-sm">
+            <BarChart2 size={13} />
+            <span>Analytics</span>
+          </Link>
         </div>
       </div>
 
-      <div className="grid-2">
-        {/* Destination & Lifecycle Editor */}
-        <div className="card" style={{ padding: '1.75rem' }}>
-          <h2 style={{ fontSize: '1.2rem', marginBottom: '1.25rem' }}>Link Destination & Rules</h2>
+      {/* Main Grid: Details Form + QR & Stats */}
+      <div className="grid-2" style={{ alignItems: 'start' }}>
+        {/* Left: Configuration & Destination */}
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">Link Configuration</h2>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              Created {new Date(link.createdAt).toLocaleDateString()}
+            </span>
+          </div>
+
           <form onSubmit={handleSave}>
             <div className="form-group">
               <label className="form-label">Destination URL</label>
               <input
                 type="url"
+                required
                 className="form-input"
                 value={originalUrl}
                 onChange={(e) => setOriginalUrl(e.target.value)}
-                required
               />
               <span className="form-hint">
-                ✨ <strong>Dynamic Persistence:</strong> Updating this destination will redirect future visitors immediately.
-                Existing printed QR codes continue working!
+                Changing this destination immediately updates all traffic and printed QR codes.
               </span>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Link Title</label>
+              <label className="form-label">Title</label>
               <input
                 type="text"
                 className="form-input"
+                placeholder="Descriptive label"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Title label"
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Expiration Date (Optional)</label>
+              <label className="form-label">Expiration Date (optional)</label>
               <input
                 type="datetime-local"
                 className="form-input"
                 value={expiresAt}
                 onChange={(e) => setExpiresAt(e.target.value)}
               />
-              <span className="form-hint">Leave blank for indefinite active lifecycle.</span>
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ marginTop: '0.75rem' }} disabled={saving}>
-              <Save size={15} />
-              <span>{saving ? 'Updating...' : 'Save Changes'}</span>
-            </button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.25rem' }}>
+              <button
+                type="submit"
+                disabled={saving}
+                className="btn btn-primary btn-sm"
+              >
+                <Save size={13} />
+                <span>{saving ? 'Saving...' : 'Save changes'}</span>
+              </button>
+            </div>
           </form>
+
+          {/* Dangerous Zone */}
+          <div style={{ marginTop: '2rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-color)' }}>
+            <h3 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--danger)', marginBottom: '0.5rem' }}>
+              Management Controls
+            </h3>
+            <div style={{ display: 'flex', gap: '0.65rem' }}>
+              <button
+                type="button"
+                onClick={handleToggleStatus}
+                className="btn btn-secondary btn-sm"
+              >
+                <Power size={13} color={link.status === 'ACTIVE' ? 'var(--warning)' : 'var(--success)'} />
+                <span>{link.status === 'ACTIVE' ? 'Pause link' : 'Enable link'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="btn btn-danger btn-sm"
+              >
+                <Trash2 size={13} />
+                <span>Delete link</span>
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Dynamic QR Code Card */}
-        <div className="card" style={{ padding: '1.75rem', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '1.2rem', marginBottom: '1.25rem', textAlign: 'left' }}>Dynamic QR Asset</h2>
-          {qrPreview ? (
-            <div>
-              <div
-                style={{
-                  display: 'inline-block',
-                  background: '#ffffff',
-                  padding: '1rem',
-                  borderRadius: '12px',
-                  boxShadow: '0 8px 25px rgba(0,0,0,0.3)',
-                  marginBottom: '1.25rem',
-                }}
-              >
-                <img
-                  src={qrPreview}
-                  alt={`QR for ${link.shortCode}`}
-                  style={{ width: '180px', height: '180px', display: 'block' }}
-                />
+        {/* Right: QR Code & Fast Metrics */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {/* Clicks Metric */}
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">Performance Summary</h2>
+              <Link to={`/links/${link.id}/analytics`} style={{ fontSize: '12px' }}>
+                Full report →
+              </Link>
+            </div>
+            <div style={{ display: 'flex', gap: '2rem', padding: '0.5rem 0' }}>
+              <div>
+                <span className="stat-label">Total Clicks</span>
+                <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px' }}>
+                  {((link as any)._count?.events ?? 0).toLocaleString()}
+                </div>
               </div>
-
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-                Vectors generated for high-dpi physical prints, event posters, merchandise, and digital displays.
-              </p>
-
-              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-                <button
-                  type="button"
-                  onClick={() => handleDownloadQr('png')}
-                  className="btn btn-secondary btn-sm"
-                >
-                  <Download size={14} />
-                  <span>Download PNG</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDownloadQr('svg')}
-                  className="btn btn-primary btn-sm"
-                >
-                  <Download size={14} />
-                  <span>Download SVG</span>
-                </button>
+              <div>
+                <span className="stat-label">Last Clicked</span>
+                <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-secondary)', marginTop: '6px' }}>
+                  {link.lastClickedAt
+                    ? new Date(link.lastClickedAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                    : 'Never'}
+                </div>
               </div>
             </div>
-          ) : (
-            <div style={{ padding: '3rem 0', color: 'var(--text-muted)' }}>
-              No QR asset generated for this link.
+          </div>
+
+          {/* Dynamic QR Box */}
+          <div className="card" style={{ textAlign: 'center' }}>
+            <div className="card-header">
+              <h2 className="card-title">Dynamic QR Code</h2>
+              <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Evergreen</span>
             </div>
-          )}
+
+            {qrPreview ? (
+              <div>
+                <div
+                  style={{
+                    display: 'inline-block',
+                    background: '#FFFFFF',
+                    padding: '0.75rem',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-md)',
+                    boxShadow: 'var(--shadow-xs)',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  <img
+                    src={qrPreview}
+                    alt="QR Code"
+                    style={{ width: '160px', height: '160px', display: 'block' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+                  <button
+                    onClick={() => handleDownloadQr('png')}
+                    className="btn btn-secondary btn-sm"
+                  >
+                    <Download size={13} />
+                    <span>Download PNG</span>
+                  </button>
+                  <button
+                    onClick={() => handleDownloadQr('svg')}
+                    className="btn btn-primary btn-sm"
+                  >
+                    <Download size={13} />
+                    <span>Download SVG</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ padding: '2rem 0', color: 'var(--text-muted)', fontSize: '13px' }}>
+                QR code is generating...
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
