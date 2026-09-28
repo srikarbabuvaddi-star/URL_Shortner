@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "LinkPulse — Intelligent URL Shortener & Campaign Analytics Platform",
   "private": true,
+  "workspaces": [
+    "server"
+  ],
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "vite",

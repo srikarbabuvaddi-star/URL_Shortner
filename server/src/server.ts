@@ -6,11 +6,26 @@ import { queueService } from './services/queueService';
 
 const app = createApp();
 
-const server = app.listen(env.PORT, () => {
-  logger.info(`🚀 LinkPulse Server running on port ${env.PORT}`);
+const HOST = '0.0.0.0';
+
+const server = app.listen(env.PORT, HOST, () => {
+  logger.info(`🚀 LinkPulse Server running on http://${HOST}:${env.PORT}`);
   logger.info(`🌐 API available at ${env.APP_URL}/api`);
   logger.info(`🔗 Redirect engine active at ${env.APP_URL}/:shortCode`);
   logger.info(`✨ Frontend expected at ${env.FRONTEND_URL}`);
+});
+
+server.on('error', (err: any) => {
+  logger.error('Fatal Server Error:', err);
+  process.exit(1);
+});
+
+process.on('uncaughtException', (err: any) => {
+  logger.error('Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason: any) => {
+  logger.error('Unhandled Rejection:', reason);
 });
 
 // Graceful shutdown handling
