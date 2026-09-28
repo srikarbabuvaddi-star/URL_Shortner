@@ -9,12 +9,15 @@ import { identifyVisitor } from '../analytics/visitorHasher';
 import { env } from '../config/env';
 import { isReservedSlug } from '../utils/codeGenerator';
 
-export async function handleRedirect(req: Request, res: Response): Promise<void> {
+export async function handleRedirect(req: Request, res: Response, next?: any): Promise<void> {
   const rawCode = req.params.shortCode;
   const shortCode = (Array.isArray(rawCode) ? rawCode[0] : rawCode)?.trim();
 
-  // Guard against reserved words if mounted on root
+  // Guard against reserved words if mounted on root - pass through to next route (e.g. SPA)
   if (!shortCode || isReservedSlug(shortCode)) {
+    if (typeof next === 'function') {
+      return next();
+    }
     handleNotFound(req, res, shortCode || 'unknown');
     return;
   }

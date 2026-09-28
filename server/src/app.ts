@@ -2,6 +2,8 @@ import express, { Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import path from 'path';
+import fs from 'fs';
 import { env } from './config/env';
 import apiRoutes from './routes/index';
 import redirectRoutes from './routes/redirectRoutes';
@@ -58,13 +60,32 @@ export function createApp(): Express {
   // Mount API endpoints
   app.use('/api', apiRoutes);
 
-  // Mount short URL redirect route (must come after API)
-  app.use('/', redirectRoutes);
-
   // Fallback 404 for unmatched API routes
   app.all('/api/*', (_req, res) => {
     res.status(404).json({ success: false, error: 'API endpoint not found' });
   });
+
+  // Serve static assets from frontend dist if built
+  const distPath = path.resolve(__dirname, '../../dist');
+  const indexHtml = path.join(distPath, 'index.html');
+  const hasFrontend = fs.existsSync(indexHtml);
+
+  if (hasFrontend) {
+    app.use(express.static(distPath));
+  }
+
+  // Mount short URL redirect route
+  app.use('/', redirectRoutes);
+
+  // If frontend dist is available, serve SPA index.html for all non-API GET requests
+  if (hasFrontend) {
+    app.get('*', (req, res, next) => {
+      if (req.method !== 'GET' || req.path.startsWith('/api')) {
+        return next();
+      }
+      res.sendFile(indexHtml);
+    });
+  }
 
   // Central error handling middleware
   app.use(errorHandler);
