@@ -6,7 +6,7 @@ export interface ApiResponse<T = any> {
   [key: string]: any;
 }
 
-const API_BASE = '/api';
+const API_BASE = (import.meta as any).env?.VITE_API_BASE || '/api';
 
 export async function request<T = any>(
   endpoint: string,
