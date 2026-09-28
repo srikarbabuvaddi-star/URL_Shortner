@@ -7,8 +7,10 @@ node_modules/
 coverage/
 
 # Production
-dist/
+/dist/
 build/
+!server/dist/
+!server/dist/**
 
 # Misc
 .DS_Store

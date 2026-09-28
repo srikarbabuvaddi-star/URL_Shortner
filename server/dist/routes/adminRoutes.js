@@ -1,0 +1,25 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const adminController_1 = require("../controllers/adminController");
+const authMiddleware_1 = require("../middleware/authMiddleware");
+const rbacMiddleware_1 = require("../middleware/rbacMiddleware");
+const validateMiddleware_1 = require("../middleware/validateMiddleware");
+const adminValidators_1 = require("../validators/adminValidators");
+const router = (0, express_1.Router)();
+// Strict RBAC Middleware applied to all admin routes
+router.use(authMiddleware_1.requireAuth);
+router.use(rbacMiddleware_1.requireAdmin);
+router.get('/overview', adminController_1.adminController.getOverview);
+router.get('/users', (0, validateMiddleware_1.validateQuery)(adminValidators_1.adminUserQuerySchema), adminController_1.adminController.getUsers);
+router.post('/users/:id/suspend', (0, validateMiddleware_1.validateBody)(adminValidators_1.suspendUserSchema), adminController_1.adminController.suspendUser);
+router.post('/users/:id/reactivate', adminController_1.adminController.reactivateUser);
+router.get('/links', (0, validateMiddleware_1.validateQuery)(adminValidators_1.adminLinkQuerySchema), adminController_1.adminController.getLinks);
+router.post('/links/:id/block', (0, validateMiddleware_1.validateBody)(adminValidators_1.blockLinkSchema), adminController_1.adminController.blockLink);
+router.post('/links/:id/unblock', adminController_1.adminController.unblockLink);
+router.get('/blocked-domains', adminController_1.adminController.getBlockedDomains);
+router.post('/blocked-domains', (0, validateMiddleware_1.validateBody)(adminValidators_1.addBlockedDomainSchema), adminController_1.adminController.addBlockedDomain);
+router.delete('/blocked-domains/:id', adminController_1.adminController.removeBlockedDomain);
+router.get('/audit-logs', adminController_1.adminController.getAuditLogs);
+router.get('/system', adminController_1.adminController.getSystemHealth);
+exports.default = router;

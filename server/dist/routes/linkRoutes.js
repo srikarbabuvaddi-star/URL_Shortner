@@ -1,0 +1,22 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const linkController_1 = require("../controllers/linkController");
+const qrController_1 = require("../controllers/qrController");
+const authMiddleware_1 = require("../middleware/authMiddleware");
+const validateMiddleware_1 = require("../middleware/validateMiddleware");
+const linkValidators_1 = require("../validators/linkValidators");
+const router = (0, express_1.Router)();
+router.use(authMiddleware_1.requireAuth);
+router.post('/', (0, validateMiddleware_1.validateBody)(linkValidators_1.createLinkSchema), linkController_1.linkController.createLink);
+router.get('/', (0, validateMiddleware_1.validateQuery)(linkValidators_1.linkQuerySchema), linkController_1.linkController.getLinks);
+router.get('/:id', linkController_1.linkController.getLinkById);
+router.patch('/:id', (0, validateMiddleware_1.validateBody)(linkValidators_1.updateLinkSchema), linkController_1.linkController.updateLink);
+router.delete('/:id', linkController_1.linkController.deleteLink);
+router.post('/:id/disable', linkController_1.linkController.disableLink);
+router.post('/:id/enable', linkController_1.linkController.enableLink);
+// Nested QR endpoints on links
+router.post('/:id/qr', qrController_1.qrController.generateQr);
+router.get('/:id/qr', qrController_1.qrController.getQrPreview);
+router.get('/:id/qr/download', qrController_1.qrController.downloadQr);
+exports.default = router;
